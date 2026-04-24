@@ -9,6 +9,7 @@ body {
   cursor: none;
 }
 
+/* TELA DE ENTRADA */
 #enter-screen {
   position: fixed;
   width: 100%;
@@ -22,33 +23,30 @@ body {
 }
 
 .glitch {
-  color: #00ffcc;
   font-size: 2rem;
+  color: #00ffcc;
   animation: glitch 1s infinite;
 }
 
 @keyframes glitch {
   0% {text-shadow: 2px 2px red;}
-  20% {text-shadow: -2px -2px blue;}
-  40% {text-shadow: 2px -2px green;}
-  60% {text-shadow: -2px 2px purple;}
-  80% {text-shadow: 2px 2px cyan;}
+  50% {text-shadow: -2px -2px cyan;}
   100% {text-shadow: none;}
 }
 
+/* FUNDO */
 canvas {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 0;
 }
 
+/* CONTEÚDO */
 .container {
   position: relative;
-  z-index: 2;
   text-align: center;
   top: 50%;
-  transform: translateY(-50%) scale(0.8);
+  transform: translateY(-50%) scale(0.7);
   opacity: 0;
   transition: 0.8s;
 }
@@ -58,38 +56,41 @@ canvas {
   opacity: 1;
 }
 
+/* AVATAR */
 .avatar {
-  width: 130px;
+  width: 140px;
   border-radius: 50%;
   border: 3px solid #00ffcc;
-  box-shadow: 0 0 20px #00ffcc;
+  box-shadow: 0 0 30px #00ffcc;
 }
 
+/* TEXTO */
 .glow {
-  margin-top: 10px;
   font-size: 2rem;
-  text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+  text-shadow: 0 0 15px #00ffcc;
 }
 
-#desc {margin:10px;color:#aaa;}
-#discord-status {margin:10px;color:#00ffcc;}
+#discord-status {
+  margin: 10px;
+  color: #00ffcc;
+}
 
+/* BOTÕES */
 .links a {
-  display:block;
-  margin:12px auto;
-  padding:12px;
-  width:220px;
-  background:rgba(0,255,204,0.1);
-  border:1px solid #00ffcc;
-  border-radius:12px;
-  text-decoration:none;
-  color:#00ffcc;
-  transition:0.3s;
+  display: block;
+  margin: 12px auto;
+  padding: 12px;
+  width: 220px;
+  background: rgba(0,255,204,0.1);
+  border: 1px solid #00ffcc;
+  border-radius: 12px;
+  color: #00ffcc;
+  text-decoration: none;
 }
 
 .links a:hover {
-  background:#00ffcc;
-  color:black;
-  transform:scale(1.08);
-  box-shadow:0 0 20px #00ffcc;
+  background: #00ffcc;
+  color: black;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #00ffcc;
 }

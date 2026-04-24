@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil Gamer EXTREMO</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- TELA DE ENTRADA -->
 <div id="enter-screen">
   <h1 class="glitch">🔥 Clique para entrar 🔥</h1>
 </div>
@@ -16,25 +16,25 @@
   <source src="musica.mp3" type="audio/mpeg">
 </audio>
 
-<audio id="clickSound">
-  <source src="click.mp3" type="audio/mpeg">
-</audio>
-
 <canvas id="particles"></canvas>
 
+<!-- CONTEÚDO (ESCONDIDO NO COMEÇO) -->
 <div class="container" id="main-content">
-  <img src="https://i.imgur.com/yourimage.png" class="avatar">
 
-  <h1 class="glow">@seunome</h1>
+  <!-- FOTO DO DISCORD -->
+  <img id="avatar" class="avatar">
+
+  <h1 class="glow" id="username">@carregando...</h1>
   <p id="desc"></p>
 
-  <p id="discord-status">Carregando status...</p>
+  <p id="discord-status"></p>
 
   <div class="links">
     <a href="#">🎮 Discord</a>
     <a href="#">📸 Instagram</a>
     <a href="#">🔥 TikTok</a>
   </div>
+
 </div>
 
 <script src="script.js"></script>
