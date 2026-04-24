@@ -1,132 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
-* {
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Orbitron',sans-serif;
-}
-
 body {
+  margin: 0;
   background: black;
-  color: white;
+  font-family: Arial;
   overflow: hidden;
 }
 
-/* esconder cursor só em PC */
-@media (pointer:fine) {
-  body {
-    cursor: none;
-  }
+/* ESCONDER SITE */
+.hidden {
+  display: none;
 }
 
-/* tela entrada */
-#enter-screen {
+/* TELA DE ENTRADA */
+#enter {
   position: fixed;
   inset: 0;
+  background: black;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: black;
+  color: cyan;
   z-index: 999;
   cursor: pointer;
 }
 
-.glitch {
-  font-size: 2rem;
-  color: #00ffcc;
-  animation: glitch 1s infinite;
-}
-
-@keyframes glitch {
-  0% {text-shadow: 2px 2px red;}
-  50% {text-shadow: -2px -2px cyan;}
-  100% {text-shadow: none;}
-}
-
-/* canvas fundo */
-canvas {
-  position: fixed;
-  inset: 0;
-}
-
-/* CENTRALIZAÇÃO PERFEITA */
-.container {
-  position: fixed;
-  inset: 0;
+/* LAYOUT */
+.layout {
   display: flex;
-  flex-direction: column;
+  height: 100vh;
+}
+
+/* ESQUERDA */
+.left {
+  width: 50%;
+  display: flex;
   justify-content: center;
   align-items: center;
-
-  opacity: 0;
-  transform: scale(0.8);
-  transition: 0.6s;
+  color: cyan;
+  font-size: 3rem;
 }
 
-.container.show {
-  opacity: 1;
-  transform: scale(1);
+/* DIREITA */
+.right {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* avatar */
-.avatar {
-  width: 140px;
-  border-radius: 50%;
-  border: 3px solid #00ffcc;
-  box-shadow: 0 0 30px #00ffcc;
-}
-
-/* textos */
-.glow {
-  font-size: 2rem;
-  text-shadow: 0 0 15px #00ffcc;
-}
-
-#desc {
-  margin: 10px;
-  color: #aaa;
-}
-
-#discord-status {
-  margin: 10px;
-  color: #00ffcc;
-}
-
-/* botões */
-.links {
-  margin-top: 10px;
-}
-
-.links a {
-  display: block;
-  margin: 10px;
-  padding: 12px;
-  width: 220px;
+/* CARD */
+.card {
+  border: 1px solid cyan;
+  padding: 30px;
   text-align: center;
-
-  background: rgba(0,255,204,0.1);
-  border: 1px solid #00ffcc;
-  border-radius: 12px;
-  color: #00ffcc;
-  text-decoration: none;
-  transition: 0.3s;
+  box-shadow: 0 0 30px cyan;
 }
 
-.links a:hover {
-  background: #00ffcc;
-  color: black;
-  transform: scale(1.1);
-  box-shadow: 0 0 20px #00ffcc;
+.card img {
+  width: 120px;
+  border-radius: 50%;
+  border: 3px solid cyan;
 }
 
-/* mobile ajuste */
-@media (max-width:600px){
-  .avatar {
-    width: 110px;
-  }
-
-  .glow {
-    font-size: 1.5rem;
-  }
+.status-box {
+  margin-top: 20px;
+  border-top: 1px solid cyan;
+  padding-top: 10px;
 }

@@ -3,34 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil Gamer EXTREMO</title>
+  <title>Perfil Cyber</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="enter-screen">
-  <h1 class="glitch">🔥 Clique para entrar 🔥</h1>
+<!-- TELA DE ENTRADA -->
+<div id="enter">
+  <h1>🔥 CLIQUE PARA ENTRAR 🔥</h1>
 </div>
 
-<audio id="musica" loop>
-  <source src="musica.mp3" type="audio/mpeg">
-</audio>
+<!-- SITE (COMEÇA ESCONDIDO) -->
+<div class="layout hidden" id="site">
 
-<canvas id="particles"></canvas>
+  <div class="left">
+    <h1 class="enter-text">ENTRAR</h1>
+  </div>
 
-<div class="container" id="main-content">
+  <div class="right">
+    <div class="card">
+      <img id="avatar">
+      <h2 id="name">Carregando...</h2>
+      <p id="user">@user</p>
 
-  <img id="avatar" class="avatar">
-
-  <h1 class="glow" id="username">@carregando...</h1>
-  <p id="desc"></p>
-
-  <p id="discord-status"></p>
-
-  <div class="links">
-    <a href="#">🎮 Discord</a>
-    <a href="#">📸 Instagram</a>
-    <a href="#">🔥 TikTok</a>
+      <div class="status-box">
+        <p id="status">Carregando...</p>
+      </div>
+    </div>
   </div>
 
 </div>
