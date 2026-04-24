@@ -3,30 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
+  <title>Gamer Profile</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="bg"></div>
 
-<div class="profile">
-
+<div class="card">
   <img id="avatar" class="avatar">
   <h1 id="username">@loading</h1>
-  <p class="bio">player • dev • vibe</p>
+  <p class="bio">⚡ Gamer • Dev • Future Pro</p>
 
-  <!-- discord -->
   <div id="discord-status"></div>
 
-  <div class="bottom">
+  <div class="stats">
     <span id="session-time">00:00</span>
     <span id="dc-time">--:--</span>
   </div>
 
   <button id="copy">Copy Discord</button>
-
 </div>
+
+<!-- cursor -->
+<div id="cursor"></div>
+
+<!-- som -->
+<audio id="click-sound" preload="auto">
+  <source src="click.mp3" type="audio/mpeg">
+</audio>
 
 <script src="script.js"></script>
 </body>

@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 * {
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:'Inter',sans-serif;
+  font-family:'Orbitron',sans-serif;
 }
 
 body {
@@ -12,77 +12,76 @@ body {
   display:flex;
   justify-content:center;
   align-items:center;
-  background:#0a0a0a;
+  background:black;
   color:white;
+  overflow:hidden;
+  cursor:none;
 }
 
-/* fundo suave */
+/* fundo */
 .bg {
   position:fixed;
   inset:0;
-  background: radial-gradient(circle at 50% 50%, #1f2937, #000);
+  background: radial-gradient(circle, #00ffcc20, black 70%);
+  animation:pulse 6s infinite;
   z-index:-1;
 }
 
-/* card principal */
-.profile {
-  width:320px;
+@keyframes pulse {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2);}
+  100%{transform:scale(1);}
+}
+
+/* card */
+.card {
+  width:340px;
   padding:25px;
   border-radius:20px;
-  background:rgba(255,255,255,0.05);
+  background:rgba(0,0,0,0.7);
   backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,0.1);
+  border:1px solid #00ffcc40;
+  box-shadow:0 0 40px #00ffcc50;
   text-align:center;
 }
 
 /* avatar */
 .avatar {
-  width:90px;
+  width:100px;
   border-radius:50%;
+  border:2px solid #00ffcc;
+  box-shadow:0 0 20px #00ffcc;
   margin-bottom:10px;
 }
 
-/* nome */
-h1 {
-  font-size:1.2rem;
-}
+/* texto */
+h1 { text-shadow:0 0 10px #00ffcc; }
+.bio { font-size:0.8rem; color:#aaa; margin-bottom:10px; }
 
-/* bio */
-.bio {
-  font-size:0.8rem;
-  color:#aaa;
-  margin-bottom:10px;
-}
-
-/* discord cards */
-#discord-status {
-  margin-top:10px;
-}
-
+/* discord */
 .dc {
-  background:rgba(0,0,0,0.5);
+  background:rgba(0,255,204,0.05);
+  border:1px solid #00ffcc30;
   padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
-  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  margin-bottom:10px;
+  transition:0.2s;
 }
-
-.dc-name {
-  font-weight:500;
+.dc:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 15px #00ffcc;
 }
-
 .dc-time {
   font-size:0.75rem;
-  color:#4ade80;
+  color:#00ffcc;
 }
 
-/* bottom */
-.bottom {
+/* stats */
+.stats {
   display:flex;
   justify-content:space-between;
-  margin-top:10px;
   font-size:0.75rem;
-  color:#888;
+  color:#aaa;
 }
 
 /* botão */
@@ -91,9 +90,28 @@ button {
   width:100%;
   padding:10px;
   border:none;
-  border-radius:10px;
-  background:#4ade80;
+  border-radius:12px;
+  background:#00ffcc;
   color:black;
   font-weight:bold;
   cursor:pointer;
+}
+
+/* cursor neon */
+#cursor {
+  position:fixed;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#00ffcc;
+  pointer-events:none;
+  z-index:9999;
+  box-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc;
+  transform:translate(-50%,-50%);
+}
+
+/* click efeito */
+.click-effect {
+  transform:translate(-50%,-50%) scale(1.8);
+  opacity:0.6;
 }
