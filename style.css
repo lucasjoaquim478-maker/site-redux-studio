@@ -1,23 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-* {margin:0;padding:0;box-sizing:border-box;font-family:'Orbitron',sans-serif;}
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Orbitron',sans-serif;
+}
 
 body {
   background: black;
   color: white;
   overflow: hidden;
-  cursor: none;
 }
 
-/* TELA DE ENTRADA */
+/* esconder cursor só em PC */
+@media (pointer:fine) {
+  body {
+    cursor: none;
+  }
+}
+
+/* tela entrada */
 #enter-screen {
   position: fixed;
-  width: 100%;
-  height: 100%;
-  background: black;
+  inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: black;
   z-index: 999;
   cursor: pointer;
 }
@@ -34,29 +44,32 @@ body {
   100% {text-shadow: none;}
 }
 
-/* FUNDO */
+/* canvas fundo */
 canvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
 }
 
-/* CONTEÚDO */
+/* CENTRALIZAÇÃO PERFEITA */
 .container {
-  position: relative;
-  text-align: center;
-  top: 50%;
-  transform: translateY(-50%) scale(0.7);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
   opacity: 0;
-  transition: 0.8s;
+  transform: scale(0.8);
+  transition: 0.6s;
 }
 
 .container.show {
-  transform: translateY(-50%) scale(1);
   opacity: 1;
+  transform: scale(1);
 }
 
-/* AVATAR */
+/* avatar */
 .avatar {
   width: 140px;
   border-radius: 50%;
@@ -64,10 +77,15 @@ canvas {
   box-shadow: 0 0 30px #00ffcc;
 }
 
-/* TEXTO */
+/* textos */
 .glow {
   font-size: 2rem;
   text-shadow: 0 0 15px #00ffcc;
+}
+
+#desc {
+  margin: 10px;
+  color: #aaa;
 }
 
 #discord-status {
@@ -75,17 +93,24 @@ canvas {
   color: #00ffcc;
 }
 
-/* BOTÕES */
+/* botões */
+.links {
+  margin-top: 10px;
+}
+
 .links a {
   display: block;
-  margin: 12px auto;
+  margin: 10px;
   padding: 12px;
   width: 220px;
+  text-align: center;
+
   background: rgba(0,255,204,0.1);
   border: 1px solid #00ffcc;
   border-radius: 12px;
   color: #00ffcc;
   text-decoration: none;
+  transition: 0.3s;
 }
 
 .links a:hover {
@@ -93,4 +118,15 @@ canvas {
   color: black;
   transform: scale(1.1);
   box-shadow: 0 0 20px #00ffcc;
+}
+
+/* mobile ajuste */
+@media (max-width:600px){
+  .avatar {
+    width: 110px;
+  }
+
+  .glow {
+    font-size: 1.5rem;
+  }
 }
