@@ -1,15 +1,17 @@
 const userId = "SEU_ID_AQUI";
 
 const enter = document.getElementById("enter");
-const site = document.getElementById("site");
+const main = document.getElementById("main");
+const musica = document.getElementById("musica");
 
-// CLIQUE PRA ENTRAR
-enter.addEventListener("click", () => {
+// entrar
+enter.onclick = () => {
   enter.style.display = "none";
-  site.classList.remove("hidden");
+  main.classList.remove("hidden");
+  musica.play();
 
   pegarDiscord();
-});
+};
 
 // DISCORD
 async function pegarDiscord() {
@@ -25,7 +27,6 @@ async function pegarDiscord() {
       `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
     document.getElementById("name").innerText = user.username;
-    document.getElementById("user").innerText = "#" + user.discriminator;
 
     if (data.data.listening_to_spotify) {
       document.getElementById("status").innerText =
@@ -41,3 +42,42 @@ async function pegarDiscord() {
     document.getElementById("status").innerText = "Erro Discord";
   }
 }
+
+// PARTICULAS
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+let particles = [];
+
+for (let i = 0; i < 100; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    speed: Math.random() * 3 + 1
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#00ffcc";
+
+  particles.forEach(p => {
+    ctx.fillRect(p.x, p.y, 2, 10);
+    p.y += p.speed;
+
+    if (p.y > canvas.height) {
+      p.y = 0;
+      p.x = Math.random() * canvas.width;
+    }
+  });
+}
+
+setInterval(draw, 30);

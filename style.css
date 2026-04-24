@@ -1,68 +1,73 @@
 body {
   margin: 0;
   background: black;
+  color: white;
   font-family: Arial;
-  overflow: hidden;
 }
 
-/* ESCONDER SITE */
+/* esconder conteúdo no começo */
 .hidden {
   display: none;
 }
 
-/* TELA DE ENTRADA */
+/* tela de entrada */
 #enter {
   position: fixed;
   inset: 0;
-  background: black;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: cyan;
+  background: black;
   z-index: 999;
   cursor: pointer;
+  color: #00ffcc;
 }
 
-/* LAYOUT */
-.layout {
-  display: flex;
-  height: 100vh;
-}
-
-/* ESQUERDA */
-.left {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: cyan;
-  font-size: 3rem;
-}
-
-/* DIREITA */
-.right {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* CARD */
-.card {
-  border: 1px solid cyan;
-  padding: 30px;
+/* centralização perfeita */
+.container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  box-shadow: 0 0 30px cyan;
 }
 
-.card img {
+/* avatar */
+.avatar {
   width: 120px;
   border-radius: 50%;
-  border: 3px solid cyan;
+  border: 3px solid #00ffcc;
+  box-shadow: 0 0 20px #00ffcc;
 }
 
-.status-box {
-  margin-top: 20px;
-  border-top: 1px solid cyan;
-  padding-top: 10px;
+/* textos */
+#name {
+  margin: 10px;
+}
+
+#status {
+  color: #00ffcc;
+}
+
+/* links */
+.links a {
+  display: block;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #00ffcc;
+  border-radius: 10px;
+  color: #00ffcc;
+  text-decoration: none;
+}
+
+.links a:hover {
+  background: #00ffcc;
+  color: black;
+}
+
+/* fundo */
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
 }
