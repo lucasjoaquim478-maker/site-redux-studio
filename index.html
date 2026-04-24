@@ -3,37 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil Gamer</title>
+  <title>Profile</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="enter-screen">
-  <h1 class="glitch">🔥 Clique para entrar 🔥</h1>
-</div>
+<div class="bg"></div>
 
-<audio id="musica" loop>
-  <source src="musica.mp3" type="audio/mpeg">
-</audio>
-
-<canvas id="particles"></canvas>
-<div id="cursor"></div>
-
-<div class="container" id="main-content">
+<div class="profile">
 
   <img id="avatar" class="avatar">
-  <h1 class="glow" id="username">@carregando...</h1>
-  <p id="desc"></p>
+  <h1 id="username">@loading</h1>
+  <p class="bio">player • dev • vibe</p>
 
-  <!-- DISCORD -->
+  <!-- discord -->
   <div id="discord-status"></div>
 
-  <p id="session-time">⏱ Tempo jogado: 00:00</p>
-  <p id="dc-time">🕒 --:--</p>
-
-  <div class="links">
-    <a id="discord-btn">🎮 Discord (clique para copiar)</a>
+  <div class="bottom">
+    <span id="session-time">00:00</span>
+    <span id="dc-time">--:--</span>
   </div>
+
+  <button id="copy">Copy Discord</button>
 
 </div>
 
