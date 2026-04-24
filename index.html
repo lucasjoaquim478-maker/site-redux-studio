@@ -11,10 +11,20 @@
 <div class="bg"></div>
 
 <div class="card">
-  <img id="avatar" class="avatar">
-  <h1 id="username">@loading</h1>
-  <p class="bio">⚡ Gamer • Dev • Future Pro</p>
 
+  <!-- AVATAR + STATUS -->
+  <div class="avatar-box">
+    <img id="avatar" class="avatar">
+    <div id="status-indicator"></div>
+  </div>
+
+  <h1 id="username">@loading</h1>
+  <p class="bio">⚡ Gamer • Dev</p>
+
+  <!-- SPOTIFY -->
+  <div id="spotify-box"></div>
+
+  <!-- DISCORD -->
   <div id="discord-status"></div>
 
   <div class="stats">
@@ -23,14 +33,13 @@
   </div>
 
   <button id="copy">Copy Discord</button>
+
 </div>
 
-<!-- cursor -->
 <div id="cursor"></div>
 
-<!-- som -->
-<audio id="click-sound" preload="auto">
-  <source src="click.mp3" type="audio/mpeg">
+<audio id="click-sound">
+  <source src="click.mp3">
 </audio>
 
 <script src="script.js"></script>
