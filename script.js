@@ -8,7 +8,9 @@ const avatar = document.getElementById("avatar");
 const username = document.getElementById("username");
 const statusEl = document.getElementById("discord-status");
 
-// clique para entrar
+const cursor = document.getElementById("cursor");
+
+// entrar
 enterScreen.addEventListener("click", () => {
   musica.play();
   enterScreen.style.display = "none";
@@ -19,7 +21,29 @@ enterScreen.addEventListener("click", () => {
   pegarStatus();
 });
 
-// texto animado
+// CURSOR INSANO (movimento suave)
+let mouseX = 0;
+let mouseY = 0;
+let posX = 0;
+let posY = 0;
+
+window.addEventListener("mousemove", (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+function animateCursor() {
+  posX += (mouseX - posX) * 0.2;
+  posY += (mouseY - posY) * 0.2;
+
+  cursor.style.left = posX + "px";
+  cursor.style.top = posY + "px";
+
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// TEXTO
 const text = "Player | Dev | Futuro Pro 🔥";
 let i = 0;
 
@@ -38,7 +62,7 @@ function escrever() {
   loop();
 }
 
-// discord
+// DISCORD
 async function pegarStatus() {
   try {
     const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
@@ -50,9 +74,7 @@ async function pegarStatus() {
       avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
       username.innerText = user.username;
 
-      if (data.data.listening_to_spotify) {
-        statusEl.innerText = "🎵 " + data.data.spotify.song;
-      } else if (data.data.activities.length > 0) {
+      if (data.data.activities.length > 0) {
         statusEl.innerText = "🎮 " + data.data.activities[0].name;
       } else {
         statusEl.innerText = "💤 Offline";
@@ -63,7 +85,7 @@ async function pegarStatus() {
   }
 }
 
-// canvas
+// PARTÍCULAS
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 

@@ -11,13 +11,20 @@ body {
   background: black;
   color: white;
   overflow: hidden;
+  cursor: none; /* esconde cursor padrão */
 }
 
-/* esconder cursor só em PC */
-@media (pointer:fine) {
-  body {
-    cursor: none;
-  }
+/* cursor neon */
+#cursor {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: #00ffcc;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
 }
 
 /* tela entrada */
@@ -50,13 +57,12 @@ canvas {
   inset: 0;
 }
 
-/* conteúdo escondido antes de entrar */
+/* esconder antes de entrar */
 #main-content {
   opacity: 0;
   pointer-events: none;
 }
 
-/* mostrar depois */
 #main-content.show {
   opacity: 1;
   pointer-events: auto;
@@ -81,7 +87,7 @@ canvas {
   box-shadow: 0 0 30px #00ffcc;
 }
 
-/* textos */
+/* texto */
 .glow {
   font-size: 2rem;
   text-shadow: 0 0 15px #00ffcc;
@@ -109,23 +115,14 @@ canvas {
   border-radius: 12px;
   color: #00ffcc;
   text-decoration: none;
-  transition: 0.3s;
 }
 
-.links a:hover {
-  background: #00ffcc;
-  color: black;
-  transform: scale(1.1);
-  box-shadow: 0 0 20px #00ffcc;
-}
-
-/* mobile */
-@media (max-width:600px){
-  .avatar {
-    width: 110px;
+/* mobile (remove cursor fake) */
+@media (pointer:coarse) {
+  #cursor {
+    display: none;
   }
-
-  .glow {
-    font-size: 1.5rem;
+  body {
+    cursor: default;
   }
 }
