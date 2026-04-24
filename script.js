@@ -1,4 +1,4 @@
-const userId = "SEU_ID_AQUI";
+const userId = "1109957738387230740";
 
 const enterScreen = document.getElementById("enter-screen");
 const musica = document.getElementById("musica");
