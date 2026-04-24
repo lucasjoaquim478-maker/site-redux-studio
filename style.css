@@ -11,7 +11,7 @@ body {
   background: black;
   color: white;
   overflow: hidden;
-  cursor: none; /* esconde cursor padrão */
+  cursor: none;
 }
 
 /* cursor neon */
@@ -27,7 +27,7 @@ body {
   z-index: 1000;
 }
 
-/* tela entrada */
+/* entrada */
 #enter-screen {
   position: fixed;
   inset: 0;
@@ -57,7 +57,7 @@ canvas {
   inset: 0;
 }
 
-/* esconder antes de entrar */
+/* esconder antes */
 #main-content {
   opacity: 0;
   pointer-events: none;
@@ -68,15 +68,14 @@ canvas {
   pointer-events: auto;
 }
 
-/* centralização */
+/* centro */
 .container {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  transition: 0.6s;
+  justify-content: center;
 }
 
 /* avatar */
@@ -85,6 +84,13 @@ canvas {
   border-radius: 50%;
   border: 3px solid #00ffcc;
   box-shadow: 0 0 30px #00ffcc;
+}
+
+/* spotify */
+.spotify {
+  width: 120px;
+  margin-top: 10px;
+  border-radius: 10px;
 }
 
 /* texto */
@@ -101,9 +107,10 @@ canvas {
 #discord-status {
   margin: 10px;
   color: #00ffcc;
+  white-space: pre-line;
 }
 
-/* botões */
+/* links */
 .links a {
   display: block;
   margin: 10px;
@@ -117,12 +124,8 @@ canvas {
   text-decoration: none;
 }
 
-/* mobile (remove cursor fake) */
+/* mobile */
 @media (pointer:coarse) {
-  #cursor {
-    display: none;
-  }
-  body {
-    cursor: default;
-  }
+  #cursor { display:none; }
+  body { cursor: default; }
 }
