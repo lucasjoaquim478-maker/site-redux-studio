@@ -88,6 +88,8 @@ function updateProgress() {
   const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
   const bar = spotifyBox.querySelector(".progress-bar");
   if (bar) bar.style.width = pct + "%";
+  const times = spotifyBox.querySelector("#spotify-times");
+  if (times) times.textContent = `${formatDuration(elapsed)} / ${formatDuration(total)}`;
 }
 
 function updateTimers() {
@@ -134,6 +136,7 @@ async function fetchStatus() {
           <div class="spotify-info">
             <div class="title">${spotify.song}</div>
             <div class="artist">${spotify.artist}</div>
+            <div class="spotify-times" id="spotify-times"></div>
             <div class="progress">
               <div class="progress-bar" style="width: ${clampedProgress}%"></div>
             </div>
