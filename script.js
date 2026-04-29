@@ -63,12 +63,33 @@ function formatDuration(ms) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+function getImageUrl(assets, key, appId) {
+  if (!assets || !assets[key]) return null;
+  const raw = assets[key];
+  if (raw.startsWith("mp:external/")) {
+    return `https://media.discordapp.net/external/${raw.split("mp:external/")[1]}`;
+  }
+  if (raw.startsWith("spotify:")) {
+    return `https://i.scdn.co/image/${raw.split("spotify:")[1]}`;
+  }
+  return `https://cdn.discordapp.com/app-assets/${appId}/${raw}.png`;
+}
+
 let sessionStart = Date.now();
 let discordStart = null;
+let currentGameStart = null;
+let currentSpotify = null;
+let hasActivity = false;
 
-setInterval(() => {
+function updateTimers() {
   sessionTime.textContent = formatDuration(Date.now() - sessionStart);
-}, 1000);
+
+  if (discordStart && hasActivity) {
+    dcTime.textContent = formatDuration(Date.now() - discordStart);
+  }
+}
+
+setInterval(updateTimers, 1000);
 
 async function fetchStatus() {
   try {
@@ -89,44 +110,61 @@ async function fetchStatus() {
     const activities = kv.activities.filter(a => a.type !== 4);
     const spotify = kv.spotify;
 
-    spotifyBox.innerHTML = "";
-    discordBox.innerHTML = "";
+    hasActivity = activities.length > 0;
 
     if (spotify) {
+      currentSpotify = spotify;
+      const progress = ((spotify.timestamps.current - spotify.timestamps.start) / (spotify.timestamps.end - spotify.timestamps.start)) * 100;
+      const clampedProgress = Math.min(100, Math.max(0, progress));
+
       spotifyBox.innerHTML = `
         <div class="spotify">
-          <img src="${spotify.album_image_url}" alt="Album">
+          <img src="${spotify.album_image_url}" alt="Album" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23111%22 width=%2250%22 height=%2250%22/><text x=%2250%25%22 y=%2255%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2300ffcc%22 font-size=%2220%22>♪</text></svg>'">
           <div class="spotify-info">
             <div class="title">${spotify.song}</div>
             <div class="artist">${spotify.artist}</div>
             <div class="progress">
-              <div class="progress-bar" style="width: ${((spotify.timestamps.current - spotify.timestamps.start) / (spotify.timestamps.end - spotify.timestamps.start)) * 100}%"></div>
+              <div class="progress-bar" style="width: ${clampedProgress}%"></div>
             </div>
           </div>
         </div>
       `;
+    } else {
+      currentSpotify = null;
+      spotifyBox.innerHTML = "";
     }
 
     if (activities.length > 0) {
       const act = activities[0];
       activityStatus.textContent = act.name.slice(0, 12);
 
-      if (act.assets?.large_image) {
-        const img = act.assets.large_image.startsWith("mp:external/")
-          ? `https://media.discordapp.net/external/${act.assets.large_image.split("mp:external/")[1]}`
-          : `https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.large_image}.png`;
+      const imgUrl = getImageUrl(act.assets, "large_image", act.application_id);
 
-        if (act.timestamps?.start) {
+      if (act.timestamps?.start) {
+        if (discordStart === null || currentGameStart !== act.timestamps.start) {
           discordStart = act.timestamps.start;
-          dcTime.textContent = formatDuration(Date.now() - discordStart);
+          currentGameStart = act.timestamps.start;
         }
+        dcTime.textContent = formatDuration(Date.now() - discordStart);
+      }
 
+      if (imgUrl) {
         discordBox.innerHTML = `
           <div class="dc">
-            <img class="game-img" src="${img}" alt="Game">
+            <img class="game-img" src="${imgUrl}" alt="Game" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23111%22 width=%2250%22 height=%2250%22/><text x=%2250%25%22 y=%2255%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2300ffcc%22 font-size=%2216%22>🎮</text></svg>'">
             <div class="dc-info">
               <div class="game-name">${act.name}</div>
-              <div class="dc-time">${formatDuration(Date.now() - (discordStart || Date.now()))}</div>
+              <div class="dc-time">${formatDuration(Date.now() - discordStart)}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        discordBox.innerHTML = `
+          <div class="dc">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎮</div>
+            <div class="dc-info">
+              <div class="game-name">${act.name}</div>
+              <div class="dc-time">${formatDuration(Date.now() - discordStart)}</div>
             </div>
           </div>
         `;
@@ -134,9 +172,12 @@ async function fetchStatus() {
     } else {
       activityStatus.textContent = "Idle";
       discordStart = null;
+      currentGameStart = null;
       dcTime.textContent = "--:--";
+      discordBox.innerHTML = "";
     }
-  } catch {
+  } catch (err) {
+    console.error(err);
     activityStatus.textContent = "Error";
   }
 }
