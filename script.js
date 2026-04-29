@@ -157,23 +157,24 @@ async function fetchStatus() {
       const act = activities[0];
       activityStatus.textContent = act.name.slice(0, 12);
 
-      const isRoblox = act.name.toLowerCase().includes("roblox");
-      let imgUrl = getImageUrl(act.assets, "large_image", act.application_id);
+      const appId = act.application_id;
+      const isRoblox = appId === "363445589247131668" || act.name.toLowerCase().includes("roblox");
+      let imgUrl = getImageUrl(act.assets, "large_image", appId);
 
       if (!imgUrl) {
-        imgUrl = getImageUrl(act.assets, "small_image", act.application_id);
+        imgUrl = getImageUrl(act.assets, "small_image", appId);
       }
 
-      if (!imgUrl && kv.visuals?.activity_images?.[act.application_id]) {
-        imgUrl = kv.visuals.activity_images[act.application_id];
+      if (!imgUrl && kv.visuals?.activity_images?.[appId]) {
+        imgUrl = kv.visuals.activity_images[appId];
       }
 
       if (!imgUrl && isRoblox) {
-        imgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Roblox_Logo_2022.svg/320px-Roblox_Logo_2022.svg.png";
+        imgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Roblox_player_icon_black.svg/480px-Roblox_player_icon_black.svg.png";
       }
 
       const imgHtml = imgUrl
-        ? `<img class="game-img" src="${imgUrl}" alt="Game">`
+        ? `<img class="game-img" src="${imgUrl}" alt="Game" onerror="this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;'>🎮</div>' + this.outerHTML">`
         : `<div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🎮</div>`;
 
       if (act.timestamps?.start) {
