@@ -81,12 +81,23 @@ let currentGameStart = null;
 let currentSpotify = null;
 let hasActivity = false;
 
+function updateProgress() {
+  if (!currentSpotify) return;
+  const elapsed = Date.now() - currentSpotify.timestamps.start;
+  const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
+  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+  const bar = spotifyBox.querySelector(".progress-bar");
+  if (bar) bar.style.width = pct + "%";
+}
+
 function updateTimers() {
   sessionTime.textContent = formatDuration(Date.now() - sessionStart);
 
   if (discordStart && hasActivity) {
     dcTime.textContent = formatDuration(Date.now() - discordStart);
   }
+
+  updateProgress();
 }
 
 setInterval(updateTimers, 1000);
