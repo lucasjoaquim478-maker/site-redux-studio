@@ -80,11 +80,14 @@ let discordStart = null;
 let currentGameStart = null;
 let currentSpotify = null;
 let hasActivity = false;
+let spotifyElapsedAtFetch = 0;
+let fetchTime = 0;
 
 function updateProgress() {
   if (!currentSpotify) return;
+
   const now = Date.now();
-  const elapsed = now - currentSpotify.timestamps.start;
+  const elapsed = spotifyElapsedAtFetch + (now - fetchTime);
   const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
 
   if (total <= 0) return;
@@ -132,8 +135,11 @@ async function fetchStatus() {
 
     if (spotify) {
       currentSpotify = spotify;
-      const progress = ((spotify.timestamps.current - spotify.timestamps.start) / (spotify.timestamps.end - spotify.timestamps.start)) * 100;
-      const clampedProgress = Math.min(100, Math.max(0, progress));
+      fetchTime = Date.now();
+      spotifyElapsedAtFetch = spotify.timestamps.current - spotify.timestamps.start;
+
+      const total = spotify.timestamps.end - spotify.timestamps.start;
+      const pct = Math.min(100, Math.max(0, (spotifyElapsedAtFetch / total) * 100));
 
       spotifyBox.innerHTML = `
         <div class="spotify">
@@ -143,7 +149,7 @@ async function fetchStatus() {
             <div class="artist">${spotify.artist}</div>
             <div class="spotify-times" id="spotify-times"></div>
             <div class="progress">
-              <div class="progress-bar" style="width: ${clampedProgress}%"></div>
+              <div class="progress-bar" style="width: ${pct}%"></div>
             </div>
           </div>
         </div>
