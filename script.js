@@ -83,12 +83,17 @@ let hasActivity = false;
 
 function updateProgress() {
   if (!currentSpotify) return;
-  const elapsed = Date.now() - currentSpotify.timestamps.start;
+  const now = Date.now();
+  const elapsed = now - currentSpotify.timestamps.start;
   const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
+
+  if (total <= 0) return;
+
   const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
   const bar = spotifyBox.querySelector(".progress-bar");
+  const times = document.getElementById("spotify-times");
+
   if (bar) bar.style.width = pct + "%";
-  const times = spotifyBox.querySelector("#spotify-times");
   if (times) times.textContent = `${formatDuration(elapsed)} / ${formatDuration(total)}`;
 }
 
