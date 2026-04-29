@@ -153,7 +153,15 @@ async function fetchStatus() {
       activityStatus.textContent = act.name.slice(0, 12);
 
       const isRoblox = act.name.toLowerCase().includes("roblox");
-      const imgUrl = getImageUrl(act.assets, "large_image", act.application_id);
+      let imgUrl = getImageUrl(act.assets, "large_image", act.application_id);
+
+      if (!imgUrl) {
+        imgUrl = getImageUrl(act.assets, "small_image", act.application_id);
+      }
+
+      if (!imgUrl && kv.visuals?.activity_images?.[act.application_id]) {
+        imgUrl = kv.visuals.activity_images[act.application_id];
+      }
 
       const imgHtml = imgUrl
         ? `<img class="game-img" src="${imgUrl}" alt="Game">`
