@@ -168,9 +168,13 @@ async function fetchStatus() {
         imgUrl = kv.visuals.activity_images[act.application_id];
       }
 
+      if (!imgUrl && isRoblox) {
+        imgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Roblox_Logo_2022.svg/320px-Roblox_Logo_2022.svg.png";
+      }
+
       const imgHtml = imgUrl
         ? `<img class="game-img" src="${imgUrl}" alt="Game">`
-        : `<div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">${isRoblox ? '🟥' : '🎮'}</div>`;
+        : `<div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🎮</div>`;
 
       if (act.timestamps?.start) {
         if (discordStart === null || currentGameStart !== act.timestamps.start) {
