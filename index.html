@@ -5,38 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gamer Profile</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="bg"></div>
+<div class="bg-gradient"></div>
+<canvas id="particles"></canvas>
 
 <div class="card">
 
-  <!-- AVATAR + STATUS -->
-  <div class="avatar-box">
-    <img id="avatar" class="avatar">
-    <div id="status-indicator"></div>
+  <div class="card-header">
+    <div class="avatar-box">
+      <div class="avatar-glow"></div>
+      <img id="avatar" class="avatar" alt="Avatar">
+      <div id="status-indicator"></div>
+    </div>
+    <div class="user-info">
+      <h1 id="username">@loading</h1>
+      <p class="bio"><span class="badge">Gamer</span><span class="badge">Dev</span></p>
+    </div>
   </div>
 
-  <h1 id="username">@loading</h1>
-  <p class="bio">⚡ Gamer • Dev</p>
+  <div class="divider"></div>
 
-  <!-- SPOTIFY -->
-  <div id="spotify-box"></div>
+  <div id="spotify-box" class="section-box"></div>
 
-  <!-- DISCORD -->
-  <div id="discord-status"></div>
+  <div id="discord-status" class="section-box"></div>
 
   <div class="stats">
-    <span id="session-time">00:00</span>
-    <span id="dc-time">--:--</span>
+    <div class="stat">
+      <span class="stat-label">Session</span>
+      <span id="session-time" class="stat-value">00:00</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Discord</span>
+      <span id="dc-time" class="stat-value">--:--</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Status</span>
+      <span id="activity-status" class="stat-value">Loading...</span>
+    </div>
   </div>
 
-  <button id="copy">Copy Discord</button>
+  <button id="copy" class="btn-glow">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="9" y="9" width="13" height="13" rx="2"/>
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+    </svg>
+    Copy Discord
+  </button>
 
 </div>
 
 <div id="cursor"></div>
+<div id="cursor-trail"></div>
 
 <audio id="click-sound">
   <source src="click.mp3">
