@@ -159,6 +159,15 @@ async function fetchStatus() {
 
       const appId = act.application_id;
       const isRoblox = appId === "363445589247131668" || act.name.toLowerCase().includes("roblox");
+
+      if (act.timestamps?.start) {
+        if (discordStart === null || currentGameStart !== act.timestamps.start) {
+          discordStart = act.timestamps.start;
+          currentGameStart = act.timestamps.start;
+        }
+        dcTime.textContent = formatDuration(Date.now() - discordStart);
+      }
+
       let imgUrl = getImageUrl(act.assets, "large_image", appId);
 
       if (!imgUrl) {
@@ -169,31 +178,21 @@ async function fetchStatus() {
         imgUrl = kv.visuals.activity_images[appId];
       }
 
-      if (!imgUrl && isRoblox) {
-        imgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Roblox_player_icon_black.svg/480px-Roblox_player_icon_black.svg.png";
-      }
+      const fallbackHtml = `<div class="game-img" style="background:linear-gradient(135deg,#e22316,#ff5e5e);display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg>
+        </div>`;
 
-      const imgHtml = imgUrl
-        ? `<img class="game-img" src="${imgUrl}" alt="Game" onerror="this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;'>🎮</div>' + this.outerHTML">`
-        : `<div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,204,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🎮</div>`;
+      const imgHtml = imgUrl ? `<img class="game-img" src="${imgUrl}" alt="Game">` : fallbackHtml;
 
-      if (act.timestamps?.start) {
-        if (discordStart === null || currentGameStart !== act.timestamps.start) {
-          discordStart = act.timestamps.start;
-          currentGameStart = act.timestamps.start;
-        }
-        dcTime.textContent = formatDuration(Date.now() - discordStart);
-      }
-
-        discordBox.innerHTML = `
-          <div class="dc">
-            ${imgHtml}
-            <div class="dc-info">
-              <div class="game-name">${act.name}</div>
-              <div class="dc-time">${formatDuration(Date.now() - discordStart)}</div>
-            </div>
+      discordBox.innerHTML = `
+        <div class="dc">
+          ${imgHtml}
+          <div class="dc-info">
+            <div class="game-name">${act.name}</div>
+            <div class="dc-time">${formatDuration(Date.now() - discordStart)}</div>
           </div>
-        `;
+        </div>
+      `;
     } else {
       activityStatus.textContent = "Idle";
       discordStart = null;
