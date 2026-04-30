@@ -11,7 +11,7 @@ const activityStatus = document.getElementById("activity-status");
 
 // ========== MUSIC ==========
 let audioCtx = null;
-let musicNodes = { master: null };
+let musicNodes = { master: null, allOsc: [] };
 let musicPlaying = false;
 let currentMusicVolume = 0.15;
 let currentTrack = 0;
@@ -23,72 +23,174 @@ const prevBtn = document.getElementById("prev-track");
 const nextBtn = document.getElementById("next-track");
 
 const ambientTracks = [
-  { url: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/KieLoKaz/Free_Ganymed/KieLoKaz_-_01_-_Reunion_of_the_Spirits.mp3", name: "Ethereal Waves", style: "ambient" },
-  { url: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_copyright/Blue_Dot_Sessions/Blue_Dot_Sessions_-_01_-_Adieu.mp3", name: "Midnight Study", style: "lofi" },
-  { url: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Komiku/Captain_Glouglous_Accidental_Adventures_459/Komiku_-_01_-_The_Story_of_Captain_Glouglou.mp3", name: "Cloud Drift", style: "chill" },
-  { url: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_copyright/Blue_Dot_Sessions/Blue_Dot_Sessions_-_03_-_Rococo.mp3", name: "Rainy Window", style: "lofi" },
-  { url: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/KieLoKaz/Free_Ganymed/KieLoKaz_-_05_-_The_Heavenly_Place.mp3", name: "Neon Pulse", style: "ambient" }
+  { name: "Ethereal Waves", bpm: 60, wave: "sine",
+    chords: [[523.25,659.25,783.99],[440,554.37,659.25],[392,493.88,587.33],[349.23,440,523.25]],
+    bass: [261.63,220,196,174.61] },
+  { name: "Midnight Study", bpm: 70, wave: "triangle",
+    chords: [[440,523.25,659.25],[392,440,523.25],[349.23,392,440],[293.66,349.23,392]],
+    bass: [220,196,174.61,146.83] },
+  { name: "Cloud Drift", bpm: 55, wave: "sine",
+    chords: [[587.33,739.99,880],[523.25,659.25,783.99],[493.88,587.33,739.99],[440,523.25,659.25]],
+    bass: [293.66,261.63,246.94,220] },
+  { name: "Rainy Window", bpm: 65, wave: "triangle",
+    chords: [[349.23,440,523.25],[293.66,349.23,440],[261.63,329.63,392],[220,261.63,329.63]],
+    bass: [174.61,146.83,130.81,110] },
+  { name: "Neon Pulse", bpm: 75, wave: "sine",
+    chords: [[493.88,587.33,739.99],[440,523.25,659.25],[392,493.88,587.33],[329.63,392,493.88]],
+    bass: [246.94,220,196,164.81] }
 ];
 
-let bgMusic = document.createElement("audio");
-bgMusic.loop = true;
-bgMusic.preload = "auto";
-bgMusic.volume = 0.15;
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicNodes.master = audioCtx.createGain();
+  musicNodes.master.gain.value = currentMusicVolume;
+  musicNodes.master.connect(audioCtx.destination);
+}
 
 function setVolume(val) {
   currentMusicVolume = val / 100;
   if (volumeSlider) volumeSlider.value = val;
-  if (bgMusic) bgMusic.volume = currentMusicVolume;
+  if (musicNodes.master) musicNodes.master.gain.value = currentMusicVolume;
 }
 
 function stopMusic() {
   musicPlaying = false;
-  if (bgMusic) {
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
-  }
+  activeIntervals.forEach(id => clearInterval(id));
+  activeIntervals = [];
+  musicNodes.allOsc.forEach(osc => { try { osc.stop(); } catch(e) {} });
+  musicNodes.allOsc = [];
+}
+
+function playNote(freq, duration, vol, waveType) {
+  if (!musicPlaying || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = waveType || "sine";
+  osc.frequency.value = freq;
+  osc2.type = waveType === "triangle" ? "sine" : "triangle";
+  osc2.frequency.value = freq;
+  osc2.detune.value = waveType === "triangle" ? 8 : 4;
+
+  filter.type = "lowpass";
+  filter.frequency.value = waveType === "triangle" ? 800 : 1200;
+  filter.Q.value = 1;
+
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(vol, now + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicNodes.master);
+  osc.start(now);
+  osc.stop(now + duration + 0.1);
+  osc2.start(now);
+  osc2.stop(now + duration + 0.1);
+  musicNodes.allOsc.push(osc, osc2);
+}
+
+function playPad(freq, vol) {
+  if (!musicPlaying || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  filter.type = "lowpass";
+  filter.frequency.value = 250;
+  gain.gain.value = vol;
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicNodes.master);
+  osc.start();
+  musicNodes.allOsc.push(osc);
 }
 
 function playAmbient(trackIndex) {
+  initAudio();
+  if (audioCtx.state === "suspended") audioCtx.resume();
   stopMusic();
   musicPlaying = true;
 
   currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
   const track = ambientTracks[currentTrack];
-  trackName.textContent = "Carregando...";
+  trackName.textContent = track.name;
 
-  bgMusic.src = track.url;
-  bgMusic.load();
+  const beatTime = 60 / track.bpm;
+  let chordIdx = 0;
+  let beatInChord = 0;
 
-  bgMusic.oncanplaythrough = () => {
-    trackName.textContent = track.name;
-    bgMusic.play().catch(err => {
-      console.log("Play error:", err);
-      trackName.textContent = "Clique p/ tocar";
-    });
-  };
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  const padFilter = audioCtx.createBiquadFilter();
+  pad.type = "sine";
+  pad.frequency.value = track.bass[0] / 2;
+  padFilter.type = "lowpass";
+  padFilter.frequency.value = 300;
+  padGain.gain.value = 0.05;
+  pad.connect(padFilter);
+  padFilter.connect(padGain);
+  padGain.connect(musicNodes.master);
+  pad.start();
+  musicNodes.allOsc.push(pad);
 
-  bgMusic.onerror = () => {
-    trackName.textContent = "Falhou...";
-    setTimeout(() => loadTrack(currentTrack + 1), 2000);
-  };
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 0.12;
+  lfoGain.gain.value = 100;
+  lfo.connect(lfoGain);
+  lfoGain.connect(padFilter.frequency);
+  lfo.start();
+  musicNodes.allOsc.push(lfo);
+
+  function playBeat() {
+    if (!musicPlaying) return;
+    const chord = track.chords[chordIdx];
+    const note = chord[beatInChord % chord.length];
+    const vol = 0.08;
+
+    playNote(note, beatTime * 0.8, vol, track.wave);
+    playNote(note * 0.5, beatTime * 1.1, 0.04, track.wave);
+
+    if (beatInChord === 0) {
+      playNote(track.bass[chordIdx], beatTime * 3.5, 0.06, "sine");
+      pad.frequency.setTargetAtTime(track.bass[chordIdx] / 2, audioCtx.currentTime, 0.5);
+    }
+
+    if (beatInChord === 2) {
+      const high = chord[Math.floor(Math.random() * chord.length)] * 2;
+      playNote(high, beatTime * 0.4, 0.03, track.wave);
+    }
+
+    beatInChord++;
+    if (beatInChord >= 4) {
+      beatInChord = 0;
+      chordIdx = (chordIdx + 1) % track.chords.length;
+    }
+  }
+
+  const interval = setInterval(playBeat, beatTime * 1000);
+  activeIntervals.push(interval);
+  playBeat();
 }
 
-function loadTrack(index) {
-  playAmbient(index);
-}
+function loadTrack(index) { playAmbient(index); }
 
 if (volumeSlider) volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
 if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack - 1); });
 if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack + 1); });
 if (trackName) trackName.addEventListener("click", (e) => {
   e.stopPropagation();
-  if (bgMusic.paused) {
-    bgMusic.play().catch(() => {});
-  } else {
-    bgMusic.pause();
-    trackName.textContent = "Pausado";
-  }
+  if (musicPlaying) { stopMusic(); trackName.textContent = "Pausado"; }
+  else { playAmbient(currentTrack); }
 });
 
 // ========== DRAG MUSIC CONTROL ==========
