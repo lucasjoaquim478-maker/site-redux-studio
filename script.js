@@ -445,19 +445,15 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // Para Roblox, usa a imagem/thumbnail do jogo
+        // Para Roblox: usa imagem do jogo da API ou thumbnail padrão
         let robloxImg = getImageUrl(act.assets, "large_image", appId);
         if (!robloxImg) robloxImg = getImageUrl(act.assets, "small_image", appId);
         if (!robloxImg && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
           robloxImg = kv.visuals.activity_images[appId];
         }
-        // Usa imagem padrão do Roblox como fallback
-        const defaultRobloxImg = "https://www.roblox.com/asset-thumbnail/image?assetId=6422174845&width=150&height=150&format=png";
-        if (robloxImg) {
-          imgHtml = '<img class="game-img" src="' + robloxImg + '" alt="Roblox" onerror="this.src=\'' + defaultRobloxImg + '\';this.onerror=null;">';
-        } else {
-          imgHtml = '<img class="game-img" src="' + defaultRobloxImg + '" alt="Roblox">';
-        }
+        // Se não tiver imagem da API, usa thumbnail padrão do Roblox
+        const robloxThumb = "https://www.roblox.com/asset-thumbnail/image?assetId=6422174845&width=110&height=110&format=png";
+        imgHtml = '<img class="game-img" src="' + (robloxImg || robloxThumb) + '" alt="Roblox">';
       } else {
         let imgUrl = getImageUrl(act.assets, "large_image", appId);
         if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
