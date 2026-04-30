@@ -532,26 +532,26 @@ body {
 
 .music-control {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 200px;
-  background: var(--bg-card);
+  top: 16px;
+  right: 16px;
+  width: 160px;
+  background: rgba(10, 10, 15, 0.85);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   z-index: 999;
   user-select: none;
   transition: box-shadow 0.2s ease;
 }
 
 .music-control:hover {
-  box-shadow: 0 4px 24px var(--primary-glow);
+  box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
 }
 
 .music-control.dragging {
-  opacity: 0.9;
-  box-shadow: 0 8px 32px var(--primary-glow);
+  opacity: 0.85;
+  box-shadow: 0 8px 28px var(--primary-glow);
   cursor: grabbing;
 }
 
@@ -562,47 +562,51 @@ body {
 .music-handle {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 10px;
   cursor: grab;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.75rem;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.08);
+  font-size: 0.65rem;
   font-weight: 600;
-  color: var(--primary);
-  border-radius: 14px 14px 0 0;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 12px 12px 0 0;
 }
 
 .music-handle svg {
-  width: 14px;
-  height: 14px;
-  color: var(--text-muted);
+  width: 12px;
+  height: 12px;
+  opacity: 0.5;
 }
 
 .music-body {
-  padding: 14px;
+  padding: 10px;
 }
 
 .volume-control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .vol-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
+  width: 13px;
+  height: 13px;
+  color: var(--primary);
   flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .volume-slider {
   -webkit-appearance: none;
   appearance: none;
   flex: 1;
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
   outline: none;
   cursor: none;
 }
@@ -610,20 +614,25 @@ body {
 .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 8px var(--primary-glow);
+  box-shadow: 0 0 6px var(--primary-glow);
   cursor: none;
+  transition: transform 0.15s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 
 .volume-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 8px var(--primary-glow);
+  box-shadow: 0 0 6px var(--primary-glow);
   border: none;
   cursor: none;
 }
@@ -631,47 +640,53 @@ body {
 .track-control {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .track-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(0, 255, 204, 0.1);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 204, 0.1);
+  background: rgba(0, 255, 204, 0.05);
   color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: none;
-  transition: background 0.2s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
 }
 
 .track-btn:hover {
-  background: rgba(0, 255, 204, 0.2);
+  background: rgba(0, 255, 204, 0.15);
+  transform: scale(1.05);
+}
+
+.track-btn:active {
+  transform: scale(0.95);
 }
 
 .track-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 11px;
+  height: 11px;
 }
 
 .track-name {
   flex: 1;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 @media (max-width: 480px) {
   .music-control {
-    width: 180px;
-    bottom: 10px;
+    width: 150px;
+    top: 10px;
     right: 10px;
   }
 
