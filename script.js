@@ -80,12 +80,14 @@ let discordStart = null;
 let currentGameStart = null;
 let currentSpotify = null;
 let hasActivity = false;
+let spotifyElapsed = 0;
+let lastUpdate = Date.now();
 
 function updateProgress() {
   if (!currentSpotify) return;
 
   const now = Date.now();
-  const elapsed = now - currentSpotify.timestamps.start;
+  const elapsed = spotifyElapsed + (now - lastUpdate);
   const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
 
   if (total <= 0) return;
@@ -96,7 +98,6 @@ function updateProgress() {
 
   if (bar) bar.style.width = pct + "%";
   if (times) times.textContent = `${formatDuration(elapsed)} / ${formatDuration(total)}`;
-  else console.warn("spotify-times not found");
 }
 
 function updateTimers() {
@@ -135,8 +136,9 @@ async function fetchStatus() {
     if (spotify) {
       currentSpotify = spotify;
       const total = spotify.timestamps.end - spotify.timestamps.start;
-      const elapsed = Date.now() - spotify.timestamps.start;
-      const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+      spotifyElapsed = Date.now() - spotify.timestamps.start;
+      lastUpdate = Date.now();
+      const pct = Math.min(100, Math.max(0, (spotifyElapsed / total) * 100));
 
       const timesInitial = formatDuration(Date.now() - spotify.timestamps.start);
       const totalInitial = formatDuration(total);
