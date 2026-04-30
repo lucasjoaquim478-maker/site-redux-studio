@@ -11,6 +11,88 @@ const activityStatus = document.getElementById("activity-status");
 const bgMusic = document.getElementById("bg-music");
 bgMusic.volume = 0.15;
 
+const tracks = [
+  { url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3", name: "Lofi Study" },
+  { url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=chill-110771.mp3", name: "Chill Vibes" },
+  { url: "https://cdn.pixabay.com/download/audio/2023/03/31/audio_c320336774.mp3?filename=lofi-beat-153189.mp3", name: "Lofi Beat" },
+  { url: "https://cdn.pixabay.com/download/audio/2022/04/27/audio_5e97580039.mp3?filename=relaxing-mountain-116474.mp3", name: "Mountain Chill" },
+  { url: "https://cdn.pixabay.com/download/audio/2024/08/20/audio_5f1d6f0e53.mp3?filename=ambient-piano-218792.mp3", name: "Ambient Piano" }
+];
+
+let currentTrack = 0;
+const volumeSlider = document.getElementById("volume-slider");
+const trackName = document.getElementById("track-name");
+const prevBtn = document.getElementById("prev-track");
+const nextBtn = document.getElementById("next-track");
+
+function setVolume(val) {
+  bgMusic.volume = val / 100;
+  volumeSlider.value = val;
+}
+
+function loadTrack(index) {
+  currentTrack = ((index % tracks.length) + tracks.length) % tracks.length;
+  bgMusic.src = tracks[currentTrack].url;
+  bgMusic.load();
+  trackName.textContent = tracks[currentTrack].name;
+  bgMusic.play().catch(() => {});
+}
+
+volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));
+prevBtn.addEventListener("click", () => loadTrack(currentTrack - 1));
+nextBtn.addEventListener("click", () => loadTrack(currentTrack + 1));
+trackName.textContent = tracks[currentTrack].name;
+
+// DRAG
+const musicControl = document.getElementById("music-control");
+const musicHandle = musicControl.querySelector(".music-handle");
+
+let isDragging = false;
+let dragX = 0, dragY = 0;
+
+musicHandle.addEventListener("mousedown", startDrag);
+musicHandle.addEventListener("touchstart", startDrag, { passive: false });
+
+function startDrag(e) {
+  e.preventDefault();
+  isDragging = true;
+  musicControl.classList.add("dragging");
+
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+  const rect = musicControl.getBoundingClientRect();
+  dragX = clientX - rect.left;
+  dragY = clientY - rect.top;
+
+  document.addEventListener("mousemove", onDrag);
+  document.addEventListener("mouseup", stopDrag);
+  document.addEventListener("touchmove", onDrag, { passive: false });
+  document.addEventListener("touchend", stopDrag);
+}
+
+function onDrag(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+  musicControl.style.left = (clientX - dragX) + "px";
+  musicControl.style.top = (clientY - dragY) + "px";
+  musicControl.style.right = "auto";
+  musicControl.style.bottom = "auto";
+}
+
+function stopDrag() {
+  isDragging = false;
+  musicControl.classList.remove("dragging");
+  document.removeEventListener("mousemove", onDrag);
+  document.removeEventListener("mouseup", stopDrag);
+  document.removeEventListener("touchmove", onDrag);
+  document.removeEventListener("touchend", stopDrag);
+}
+
 const enterScreen = document.getElementById("enter-screen");
 const mainContent = document.getElementById("main-content");
 let hasEntered = false;
@@ -27,14 +109,8 @@ function startApp() {
 enterScreen.addEventListener("click", () => {
   if (hasEntered) return;
   hasEntered = true;
-  bgMusic.load();
-  bgMusic.volume = 0.15;
-  bgMusic.play().catch(err => {
-    console.warn("Audio play failed:", err);
-    bgMusic.src = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
-    bgMusic.load();
-    setTimeout(() => bgMusic.play().catch(() => {}), 500);
-  });
+  loadTrack(0);
+  setVolume(15);
   enterScreen.classList.add("fade-out");
   mainContent.classList.add("show");
   document.body.style.overflow = "auto";
