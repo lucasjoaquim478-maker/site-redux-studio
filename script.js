@@ -11,6 +11,12 @@ const activityStatus = document.getElementById("activity-status");
 const copyBtn = document.getElementById("copy");
 const clickSound = document.getElementById("click-sound");
 
+spotifyBox.addEventListener("click", () => {
+  if (currentSpotify?.track_id) {
+    window.open(`https://open.spotify.com/track/${currentSpotify.track_id}`, "_blank");
+  }
+});
+
 const cursor = document.getElementById("cursor");
 const cursorTrail = document.getElementById("cursor-trail");
 

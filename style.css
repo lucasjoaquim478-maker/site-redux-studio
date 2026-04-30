@@ -177,6 +177,14 @@ body {
   transition: transform 0.2s ease;
 }
 
+#spotify-box {
+  cursor: none;
+}
+
+#spotify-box .spotify {
+  cursor: none;
+}
+
 .spotify:hover {
   transform: scale(1.02);
 }
