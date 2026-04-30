@@ -11,12 +11,12 @@ const activityStatus = document.getElementById("activity-status");
 
 // ========== MUSIC ==========
 let audioCtx = null;
-let musicNodes = { master: null, allOsc: [] };
+let musicMaster = null;
 let musicPlaying = false;
 let currentMusicVolume = 0.15;
 let currentTrack = 0;
-let activeIntervals = [];
-let trackAnimFrame = null;
+let activeTimers = [];
+let allSounds = [];
 
 const volumeSlider = document.getElementById("volume-slider");
 const trackName = document.getElementById("track-name");
@@ -26,274 +26,164 @@ const nextBtn = document.getElementById("next-track");
 function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  musicNodes.master = audioCtx.createGain();
-  musicNodes.master.gain.value = currentMusicVolume;
-  musicNodes.master.connect(audioCtx.destination);
+  musicMaster = audioCtx.createGain();
+  musicMaster.gain.value = currentMusicVolume;
+  musicMaster.connect(audioCtx.destination);
 }
 
 function setVolume(val) {
   currentMusicVolume = val / 100;
   if (volumeSlider) volumeSlider.value = val;
-  if (musicNodes.master) musicNodes.master.gain.value = currentMusicVolume;
+  if (musicMaster) musicMaster.gain.value = currentMusicVolume;
 }
 
-function stopMusic() {
+function killAll() {
   musicPlaying = false;
-  activeIntervals.forEach(id => clearInterval(id));
-  activeIntervals = [];
-  if (trackAnimFrame) cancelAnimationFrame(trackAnimFrame);
-  trackAnimFrame = null;
-  musicNodes.allOsc.forEach(osc => { try { osc.stop(); } catch(e) {} });
-  musicNodes.allOsc = [];
+  activeTimers.forEach(id => clearInterval(id));
+  activeTimers = [];
+  allSounds.forEach(s => { try { s.stop(); } catch(e) {} });
+  allSounds = [];
 }
 
-function makeOsc(freq, type, vol) {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  osc.type = type;
-  osc.frequency.value = freq;
-  filter.type = "lowpass";
-  filter.frequency.value = 2000;
-  gain.gain.value = vol;
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(musicNodes.master);
-  osc.start();
-  musicNodes.allOsc.push(osc);
-  return { osc, gain, filter };
-}
-
-function note(freq, duration, vol, type, attack, release) {
+function tone(freq, dur, vol, type) {
   if (!musicPlaying || !audioCtx) return;
   const osc = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  const a = attack || 0.05;
-  const r = release || duration;
   osc.type = type || "sine";
   osc.frequency.value = freq;
-  osc2.type = type === "square" ? "sawtooth" : "triangle";
-  osc2.frequency.value = freq;
-  osc2.detune.value = 5;
-  filter.type = "lowpass";
-  filter.frequency.value = type === "square" ? 1500 : 1200;
-  filter.Q.value = 0.5;
   const now = audioCtx.currentTime;
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(vol, now + a);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-  osc.connect(filter);
-  osc2.connect(filter);
-  filter.connect(gain);
-  gain.connect(musicNodes.master);
+  gain.gain.linearRampToValueAtTime(vol, now + 0.05);
+  gain.gain.setValueAtTime(vol, now + dur - 0.1);
+  gain.gain.linearRampToValueAtTime(0, now + dur);
+  osc.connect(gain);
+  gain.connect(musicMaster);
   osc.start(now);
-  osc.stop(now + duration + 0.2);
-  osc2.start(now);
-  osc2.stop(now + duration + 0.2);
-  musicNodes.allOsc.push(osc, osc2);
+  osc.stop(now + dur + 0.01);
+  allSounds.push(osc);
 }
 
-// ===== TRACK 1: Ethereal Waves — slow pads, sine, dreamy =====
-function track1() {
-  const chords = [
-    [523.25, 659.25, 783.99],
-    [440, 554.37, 659.25],
-    [392, 493.88, 587.33],
-    [349.23, 440, 523.25]
-  ];
-  const bass = [261.63, 220, 196, 174.61];
-  let idx = 0;
-
-  const pad = audioCtx.createOscillator();
-  const padG = audioCtx.createGain();
-  const padF = audioCtx.createBiquadFilter();
-  pad.type = "sine";
-  pad.frequency.value = bass[0] / 2;
-  padF.type = "lowpass";
-  padF.frequency.value = 400;
-  padG.gain.value = 0.06;
-  pad.connect(padF); padF.connect(padG); padG.connect(musicNodes.master); pad.start();
-  musicNodes.allOsc.push(pad);
-
-  const lfo = audioCtx.createOscillator();
-  const lfoG = audioCtx.createGain();
-  lfo.frequency.value = 0.08;
-  lfoG.gain.value = 150;
-  lfo.connect(lfoG); lfoG.connect(padF.frequency); lfo.start();
-  musicNodes.allOsc.push(lfo);
-
-  activeIntervals.push(setInterval(() => {
-    if (!musicPlaying) return;
-    const ch = chords[idx];
-    ch.forEach(f => note(f * 0.5, 8, 0.04, "sine", 1, 3));
-    note(bass[idx], 6, 0.05, "sine", 0.5, 2);
-    pad.frequency.setTargetAtTime(bass[idx] / 2, audioCtx.currentTime, 1);
-    idx = (idx + 1) % chords.length;
-  }, 6000));
+function pad(freq, vol) {
+  if (!musicPlaying || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.value = vol;
+  osc.connect(gain);
+  gain.connect(musicMaster);
+  osc.start();
+  allSounds.push(osc);
 }
 
-// ===== TRACK 2: Midnight Study — lofi triangle, syncopated =====
-function track2() {
-  const scale = [293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33];
-  let step = 0;
-  const bpm = 72;
-  const bt = 60000 / bpm;
-
-  const pad = makeOsc(146.83, "triangle", 0.04);
-  const lfo = audioCtx.createOscillator();
-  const lfoG = audioCtx.createGain();
-  lfo.frequency.value = 0.3;
-  lfoG.gain.value = 200;
-  lfo.connect(lfoG); lfoG.connect(pad.filter.frequency); lfo.start();
-  musicNodes.allOsc.push(lfo);
-
-  function beat() {
+// TRACK 1 — pads lentos, acordes maiores, suave
+function playTrack1() {
+  const chords = [[261.63,329.63,392],[220,277.18,329.63],[196,246.94,293.66],[174.61,220,261.63]];
+  let i = 0;
+  pad(65.41, 0.08);
+  activeTimers.push(setInterval(() => {
     if (!musicPlaying) return;
-    const f = scale[step % scale.length];
-    if (step % 4 === 0) note(f, bt * 0.015, 0.1, "triangle", 0.01, 0.01);
-    if (step % 4 === 2) note(f * 1.5, bt * 0.012, 0.07, "triangle", 0.01, 0.01);
-    if (step % 8 === 0) {
-      note(f * 0.25, bt * 0.035, 0.08, "sine", 0.02, 0.02);
-      pad.osc.frequency.setTargetAtTime(f * 0.25, audioCtx.currentTime, 0.3);
-    }
-    if (step % 3 === 0) note(f * 2, bt * 0.006, 0.03, "sine", 0.005, 0.005);
-    step++;
+    chords[i].forEach(f => { tone(f, 5, 0.06, "sine"); tone(f * 0.5, 6, 0.04, "sine"); });
+    i = (i + 1) % chords.length;
+  }, 4000));
+}
+
+// TRACK 2 — lofi, triangle, notas soltas com swing
+function playTrack2() {
+  const notes = [293.66,329.63,349.23,392,440,392,349.23,329.63];
+  const bass = [146.83,164.81,174.61,196,196,174.61,164.81,146.83];
+  let s = 0;
+  pad(73.42, 0.05);
+  function hit() {
+    if (!musicPlaying) return;
+    if (s % 2 === 0) tone(notes[s % notes.length], 1.5, 0.12, "triangle");
+    if (s % 4 === 0) tone(bass[s % bass.length], 2, 0.08, "sine");
+    if (s % 3 === 0) tone(notes[s % notes.length] * 2, 0.4, 0.04, "sine");
+    s++;
   }
-  activeIntervals.push(setInterval(beat, bt / 2));
+  activeTimers.push(setInterval(hit, 420));
 }
 
-// ===== TRACK 3: Cloud Drift — high arpeggios, shimmering =====
-function track3() {
-  const arps = [
-    [783.99, 987.77, 1174.66, 1318.51],
-    [659.25, 783.99, 987.77, 1174.66],
-    [587.33, 739.99, 880, 987.77],
-    [523.25, 659.25, 783.99, 880]
-  ];
-  const bass = [392, 329.63, 293.66, 261.63];
-  let chordI = 0, noteI = 0;
-
-  const pad = makeOsc(196, "sine", 0.03);
-  pad.filter.frequency.value = 600;
-
-  function arp() {
+// TRACK 3 — arpejos altos, cintilante, rápido
+function playTrack3() {
+  const arp = [523.25,659.25,783.99,1046.50,783.99,659.25,523.25,392,493.88,587.33,783.99,987.77];
+  const bass = [130.81,164.81,196,261.63];
+  let n = 0;
+  pad(65.41, 0.03);
+  function arpeggio() {
     if (!musicPlaying) return;
-    const chord = arps[chordI];
-    const f = chord[noteI % chord.length];
-    note(f, 1.5, 0.06, "sine", 0.3, 1);
-    note(f * 1.002, 1.8, 0.03, "sine", 0.5, 1.2);
-    if (noteI % 4 === 0) {
-      note(bass[chordI] * 0.5, 4, 0.05, "sine", 0.5, 2);
-      pad.osc.frequency.setTargetAtTime(bass[chordI], audioCtx.currentTime, 1);
-    }
-    if (noteI % 8 === 4) {
-      note(chord[Math.floor(Math.random() * chord.length)] * 2, 0.6, 0.04, "sine", 0.1, 0.3);
-    }
-    noteI++;
-    if (noteI % 8 === 0) { chordI = (chordI + 1) % arps.length; }
+    tone(arp[n % arp.length], 0.8, 0.08, "sine");
+    if (n % 6 === 0) tone(bass[(n / 6 | 0) % bass.length], 3, 0.06, "sine");
+    n++;
   }
-  activeIntervals.push(setInterval(arp, 500));
+  activeTimers.push(setInterval(arpeggio, 250));
 }
 
-// ===== TRACK 4: Rainy Window — dark, minor key, sparse, moody =====
-function track4() {
-  const minor = [220, 246.94, 261.63, 293.66, 329.63, 349.23, 392];
-  let phrase = 0;
-
+// TRACK 4 — dark, tons menores, lento e espaçado
+function playTrack4() {
+  const minor = [220,233.08,261.63,293.66,311.13,349.23];
+  let p = 0;
   const drone = audioCtx.createOscillator();
-  const droneG = audioCtx.createGain();
-  const droneF = audioCtx.createBiquadFilter();
+  const droneGain = audioCtx.createGain();
   drone.type = "sawtooth";
-  drone.frequency.value = 110;
-  droneF.type = "lowpass";
-  droneF.frequency.value = 200;
-  droneF.Q.value = 5;
-  droneG.gain.value = 0.03;
-  drone.connect(droneF); droneF.connect(droneG); droneG.connect(musicNodes.master); drone.start();
-  musicNodes.allOsc.push(drone);
-
-  const droneLfo = audioCtx.createOscillator();
-  const droneLfoG = audioCtx.createGain();
-  droneLfo.frequency.value = 0.05;
-  droneLfoG.gain.value = 100;
-  droneLfo.connect(droneLfoG); droneLfoG.connect(droneF.frequency); droneLfo.start();
-  musicNodes.allOsc.push(droneLfo);
-
-  function rain() {
+  drone.frequency.value = 55;
+  droneGain.gain.value = 0.025;
+  drone.connect(droneGain);
+  droneGain.connect(musicMaster);
+  drone.start();
+  allSounds.push(drone);
+  function drop() {
     if (!musicPlaying) return;
-    const f = minor[Math.floor(Math.random() * minor.length)];
-    if (phrase % 3 === 0) {
-      note(f, 4, 0.05, "sine", 2, 2);
-      note(f * 1.2, 5, 0.03, "sine", 2.5, 2);
+    if (p % 2 === 0) {
+      const f = minor[Math.floor(Math.random() * minor.length)];
+      tone(f, 4, 0.07, "sine");
     }
-    if (phrase % 5 === 0) {
-      note(f * 0.25, 6, 0.06, "triangle", 1, 3);
-      drone.frequency.setTargetAtTime(f * 0.5, audioCtx.currentTime, 2);
+    if (p % 3 === 0) tone(110, 5, 0.05, "triangle");
+    if (p % 5 === 0) {
+      const f = minor[Math.floor(Math.random() * minor.length)];
+      tone(f * 2, 0.5, 0.03, "sine");
     }
-    if (phrase % 7 === 0) {
-      note(f * 3, 0.3, 0.02, "sine", 0.1, 0.1);
-    }
-    phrase++;
+    p++;
   }
-  activeIntervals.push(setInterval(rain, 3000));
+  activeTimers.push(setInterval(drop, 2500));
 }
 
-// ===== TRACK 5: Neon Pulse — synthwave, square, driving =====
-function track5() {
-  const riff = [164.81, 196, 220, 246.94, 220, 196, 164.81, 146.83];
-  const arpUp = [329.63, 415.30, 493.88, 659.25];
-  let step = 0;
-  const bpm = 110;
-  const bt = 60000 / bpm;
-
-  const bass = makeOsc(82.41, "square", 0.06);
-  bass.filter.frequency.value = 500;
-
+// TRACK 5 — synthwave, square, rápido e pulsante
+function playTrack5() {
+  const bassLine = [82.41,98,110,123.47,110,98,82.41,73.42];
+  const melody = [329.63,415.30,493.88,554.37,493.88,415.30,329.63,246.94];
+  let s = 0;
   function pulse() {
     if (!musicPlaying) return;
-    const sf = step % 8;
-    if (sf < 4) {
-      note(riff[sf] * 0.5, bt * 0.022, 0.1, "square", 0.005, 0.005);
-      bass.osc.frequency.setTargetAtTime(riff[sf] * 0.5, audioCtx.currentTime, 0.05);
-    }
-    if (sf % 2 === 0) {
-      note(arpUp[(step >> 1) % arpUp.length], bt * 0.01, 0.06, "square", 0.003, 0.003);
-      note(arpUp[(step >> 1) % arpUp.length] * 2, bt * 0.006, 0.03, "square", 0.002, 0.002);
-    }
-    if (sf === 0 || sf === 4) {
-      note(riff[sf] * 2, bt * 0.018, 0.07, "sawtooth", 0.01, 0.01);
-    }
-    if (sf === 6) {
-      note(arpUp[(step >> 1) % arpUp.length] * 1.5, bt * 0.012, 0.04, "sawtooth", 0.005, 0.005);
-    }
-    step++;
+    tone(bassLine[s % bassLine.length], 0.2, 0.1, "square");
+    if (s % 2 === 0) tone(melody[s % melody.length], 0.15, 0.06, "square");
+    if (s % 4 === 0) tone(bassLine[s % bassLine.length] * 4, 0.1, 0.04, "sawtooth");
+    s++;
   }
-  activeIntervals.push(setInterval(pulse, bt / 2));
+  activeTimers.push(setInterval(pulse, 200));
 }
 
-const trackFunctions = [track1, track2, track3, track4, track5];
-const trackNames = ["Ethereal Waves", "Midnight Study", "Cloud Drift", "Rainy Window", "Neon Pulse"];
+const tracks = [playTrack1, playTrack2, playTrack3, playTrack4, playTrack5];
+const names = ["Ethereal Waves", "Midnight Study", "Cloud Drift", "Rainy Window", "Neon Pulse"];
 
-function playAmbient(trackIndex) {
+function playAmbient(idx) {
   initAudio();
   if (audioCtx.state === "suspended") audioCtx.resume();
-  stopMusic();
+  killAll();
   musicPlaying = true;
-  currentTrack = ((trackIndex % trackFunctions.length) + trackFunctions.length) % trackFunctions.length;
-  trackName.textContent = trackNames[currentTrack];
-  trackFunctions[currentTrack]();
+  currentTrack = ((idx % tracks.length) + tracks.length) % tracks.length;
+  trackName.textContent = names[currentTrack];
+  tracks[currentTrack]();
 }
 
-function loadTrack(index) { playAmbient(index); }
+function loadTrack(i) { playAmbient(i); }
 
 if (volumeSlider) volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
 if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack - 1); });
 if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack + 1); });
 if (trackName) trackName.addEventListener("click", (e) => {
   e.stopPropagation();
-  if (musicPlaying) { stopMusic(); trackName.textContent = "Pausado"; }
+  if (musicPlaying) { killAll(); trackName.textContent = "Pausado"; }
   else { playAmbient(currentTrack); }
 });
 
