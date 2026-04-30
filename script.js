@@ -277,7 +277,7 @@ if (enterScreen) {
   enterScreen.addEventListener(isTouch ? "touchstart" : "click", function handler(e) {
     if (hasEntered) return;
     hasEntered = true;
-    setVolume(5);
+setVolume(15);
     enterScreen.classList.add("fade-out");
     mainContent.classList.add("show");
     document.body.style.overflow = "auto";
