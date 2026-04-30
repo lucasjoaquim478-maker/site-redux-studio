@@ -140,35 +140,10 @@ spotifyBox.addEventListener("click", () => {
   }
 });
 
-const cursor = document.getElementById("cursor");
-const cursorTrail = document.getElementById("cursor-trail");
-
-let mouseX = 0, mouseY = 0;
-let trailX = 0, trailY = 0;
-
-window.addEventListener("mousemove", (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  cursor.style.left = mouseX + "px";
-  cursor.style.top = mouseY + "px";
-});
-
-function animateTrail() {
-  trailX += (mouseX - trailX) * 0.15;
-  trailY += (mouseY - trailY) * 0.15;
-  cursorTrail.style.left = trailX + "px";
-  cursorTrail.style.top = trailY + "px";
-  requestAnimationFrame(animateTrail);
-}
-animateTrail();
-
 document.addEventListener("mousedown", () => {
-  cursor.classList.add("click-effect");
   clickSound.currentTime = 0;
   clickSound.play().catch(() => {});
 });
-
-document.addEventListener("mouseup", () => cursor.classList.remove("click-effect"));
 
 copyBtn.addEventListener("click", () => {
   navigator.clipboard.writeText(userId).then(() => {

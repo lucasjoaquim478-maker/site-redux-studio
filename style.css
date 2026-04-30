@@ -25,9 +25,10 @@ body {
   background: var(--bg-dark);
   color: var(--text);
   font-family: 'Inter', sans-serif;
-  overflow: hidden;
-  cursor: none;
-  padding: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
 }
 
 .bg-gradient {
@@ -59,7 +60,7 @@ body {
     radial-gradient(ellipse at 80% 20%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
     var(--bg-dark);
   z-index: 1000;
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -145,6 +146,11 @@ body {
   opacity: 0;
   transform: scale(0.98);
   transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .main-content.show {
@@ -294,11 +300,11 @@ body {
 }
 
 #spotify-box {
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
 }
 
 #spotify-box .spotify {
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
 }
 
 .spotify:hover {
@@ -542,7 +548,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -683,7 +689,7 @@ body {
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.08);
   outline: none;
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -694,7 +700,7 @@ body {
   border-radius: 50%;
   background: var(--primary);
   box-shadow: 0 0 6px var(--primary-glow);
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
   transition: transform 0.15s ease;
 }
 
@@ -709,7 +715,7 @@ body {
   background: var(--primary);
   box-shadow: 0 0 6px var(--primary-glow);
   border: none;
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
 }
 
 .track-control {
@@ -728,7 +734,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: none;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='%2300ffcc'/%3E%3C/svg%3E") 6 6, pointer;
   transition: background 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
 }
@@ -771,17 +777,19 @@ body {
   .volume-slider {
     cursor: default;
   }
-}
+
   body {
     overflow-y: auto;
     padding: 20px 12px;
-    cursor: auto;
   }
 
   .main-content {
     width: 100%;
     display: flex;
     justify-content: center;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: 20px;
   }
 
   .card {
@@ -861,11 +869,6 @@ body {
     padding: 11px;
     font-size: 0.8rem;
     border-radius: 12px;
-  }
-
-  #cursor,
-  #cursor-trail {
-    display: none;
   }
 
   .enter-screen {
