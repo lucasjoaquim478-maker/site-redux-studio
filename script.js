@@ -345,14 +345,14 @@ function getImageUrl(assets, key, appId) {
   if (!assets || !key || !assets[key]) return null;
   const raw = assets[key];
   if (!raw || typeof raw !== "string") return null;
+  // Ignorar valores que não são IDs numéricos
+  if (!/^\d+$/.test(raw)) return null;
   if (raw.startsWith("mp:external/")) {
     return "https://media.discordapp.net/external/" + raw.split("mp:external/")[1];
   }
   if (raw.startsWith("spotify:")) {
     return "https://i.scdn.co/image/" + raw.split("spotify:")[1];
   }
-  // Validar que raw contém apenas números
-  if (!/^\d+$/.test(raw)) return null;
   return "https://cdn.discordapp.com/app-assets/" + appId + "/" + raw + ".png";
 }
 
