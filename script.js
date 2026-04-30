@@ -445,8 +445,8 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // SVG do Roblox - fill white
-        imgHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24"><polygon fill="white" points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
+        // Mostrar texto simples para Roblox
+        imgHtml = '<div class="game-img" style="background:linear-gradient(135deg,#e22316,#ff6b6b);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold;">R</div>';
       } else {
         let imgUrl = getImageUrl(act.assets, "large_image", appId);
         if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
