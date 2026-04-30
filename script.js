@@ -445,27 +445,17 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // Tenta obter imagem real do Roblox via asset ou visuals
+        // Para Roblox, tenta mostrar imagem real ou thumbnail válida
         let robloxImg = getImageUrl(act.assets, "large_image", appId);
         if (!robloxImg) robloxImg = getImageUrl(act.assets, "small_image", appId);
         if (!robloxImg && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
           robloxImg = kv.visuals.activity_images[appId];
         }
-        // Se a imagem for do Discord CDN, converte para URL válida do Roblox
-        if (robloxImg && robloxImg.includes('cdn.discordapp.com/app-assets')) {
-          // Tenta extrair ID da imagem e converter para thumbnail do Roblox
-          const match = robloxImg.match(/\/([0-9]+)\.png/);
-          if (match) {
-            const assetId = match[1];
-            robloxImg = 'https://www.roblox.com/asset-thumbnail/image?assetId=' + assetId + '&width=150&height=150&format=png';
-          }
+        // Usa thumbnail padrão do Roblox se não houver imagem da API
+        if (!robloxImg) {
+          robloxImg = "https://tr.rbxcdn.com/7aa3caa3c1fe2b4c5cec4e04c1f978c/150/150/Image/Png";
         }
-        if (robloxImg) {
-          imgHtml = '<img class="game-img" src="' + robloxImg + '" alt="Roblox" onerror="this.onerror=null;this.src=\'https://tr.rbxcdn.com/7aa3caa3c1fe2b4c5cec4e04c1f978c/150/150/Image/Png\';">';
-        } else {
-          // Fallback: thumbnail padrão do Roblox
-          imgHtml = '<img class="game-img" src="https://tr.rbxcdn.com/7aa3caa3c1fe2b4c5cec4e04c1f978c/150/150/Image/Png" alt="Roblox">';
-        }
+        imgHtml = '<img class="game-img" src="' + robloxImg + '" alt="Roblox">';
       } else {
         let imgUrl = getImageUrl(act.assets, "large_image", appId);
         if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
