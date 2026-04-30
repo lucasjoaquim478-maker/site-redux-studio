@@ -364,6 +364,7 @@ body {
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease;
+  position: relative;
 }
 
 .dc:hover {
@@ -386,6 +387,12 @@ body {
   object-fit: cover;
   flex-shrink: 0;
   display: block;
+}
+
+.game-img + .roblox-icon {
+  display: none;
+  position: absolute;
+  left: 10px;
 }
 
 .roblox-icon {

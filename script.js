@@ -297,7 +297,10 @@ function playClick() {
   osc.stop(now + 0.06);
 }
 
-document.addEventListener("mousedown", () => { playClick(); });
+document.addEventListener("mousedown", (e) => {
+  if (e.target.closest(".btn-glow, .track-btn, .volume-slider, .music-control, .spotify, #enter-screen")) return;
+  playClick();
+});
 
 if (copyBtn) {
   copyBtn.addEventListener("click", () => {
@@ -353,7 +356,7 @@ function updateTimers() {
   const now = new Date();
   const brt = now.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour12: false });
   if (sessionTime) sessionTime.textContent = brt;
-  if (discordStart && hasActivity) {
+  if (discordStart && hasActivity && dcTime) {
     dcTime.textContent = formatDuration(Date.now() - discordStart);
   }
   updateProgress();
@@ -374,7 +377,7 @@ async function fetchStatus() {
     } else if (user.avatar) {
       avatar.src = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
     } else {
-      const defaultIndex = BigInt(user.id) >> BigInt(22) % BigInt(6);
+      const defaultIndex = Number((BigInt(user.id) >> 22n) % 6n);
       avatar.src = "https://cdn.discordapp.com/embed/avatars/" + defaultIndex + ".png";
     }
 
@@ -429,7 +432,7 @@ async function fetchStatus() {
       }
 
       const fallbackHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
-      const imgHtml = imgUrl ? '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.outerHTML=\'<div class=\\'game-img roblox-icon\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'white\\'><polygon points=\\'16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16\\'/></svg></div>\'">' : fallbackHtml;
+      const imgHtml = imgUrl ? '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' + fallbackHtml : fallbackHtml;
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
       discordBox.innerHTML =
