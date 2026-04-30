@@ -449,8 +449,11 @@ async function fetchStatus() {
         imgUrl = kv.visuals.activity_images[appId];
       }
 
-      const fallbackHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
-      const imgHtml = imgUrl ? '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' + fallbackHtml : fallbackHtml;
+      let fallbackHtml = '';
+      if (isRoblox) {
+        fallbackHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
+      }
+      const imgHtml = imgUrl ? '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.style.display=\'none\';if(this.nextElementSibling)this.nextElementSibling.style.display=\'flex\'">' + fallbackHtml : fallbackHtml;
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
       discordBox.innerHTML =

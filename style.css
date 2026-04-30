@@ -489,6 +489,10 @@ body {
   left: 10px;
 }
 
+.no-touch .game-img + .roblox-icon {
+  left: 14px;
+}
+
 .roblox-icon {
   width: 36px;
   height: 36px;
@@ -502,6 +506,16 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.no-touch .roblox-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 44px;
+  max-height: 44px;
+  border-radius: 10px;
 }
 
 .roblox-icon svg {
