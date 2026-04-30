@@ -1,30 +1,11 @@
 const userId = "1109957738387230740";
 
-// YouTube Player - apenas áudio
-var ytPlayer;
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('youtube-player', {
-    videoId: '3HjG1Y4QpVA',
-    playerVars: {
-      'autoplay': 1,
-      'controls': 0,
-      'disablekb': 1,
-      'fs': 0,
-      'loop': 1,
-      'playlist': '3HjG1Y4QpVA',
-      'iv_load_policy': 3,
-      'volume': 15,
-      'width': 1,
-      'height': 1
-    },
-    events: {
-      'onReady': function(event) {
-        event.target.setVolume(15);
-        event.target.playVideo();
-      }
-    }
-  });
-}
+// Áudio relaxante de fundo
+let bgMusic = new Audio();
+bgMusic.src = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=relaxing-piano-amp-flute-116997.mp3";
+bgMusic.volume = 0.15;
+bgMusic.loop = true;
+bgMusic.style.display = "none";
 
 const avatar = document.getElementById("avatar");
 const username = document.getElementById("username");
@@ -283,9 +264,6 @@ function startApp() {
   timerInterval = setInterval(updateTimers, 1000);
   fetchStatus();
   fetchInterval = setInterval(fetchStatus, 3000);
-  // Tocar música relaxante em volume baixo
-  loadTrack(0);
-  setVolume(15);
 }
 
 if (enterScreen) {
@@ -300,16 +278,15 @@ if (enterScreen) {
     if (enterHintText) enterHintText.textContent = "Clique em qualquer lugar";
   }
 
-  enterScreen.addEventListener(isTouch ? "touchstart" : "click", function handler(e) {
+enterScreen.addEventListener(isTouch ? "touchstart" : "click", function handler(e) {
     if (hasEntered) return;
     hasEntered = true;
-setVolume(15);
     enterScreen.classList.add("fade-out");
     mainContent.classList.add("show");
     document.body.style.overflow = "auto";
     setTimeout(() => { enterScreen.style.display = "none"; }, 600);
-    // Tocar música automaticamente após entrar
-    loadTrack(0);
+    // Tocar música relaxante
+    bgMusic.play().catch(() => {});
     startApp();
     enterScreen.removeEventListener(isTouch ? "touchstart" : "click", handler);
   });
