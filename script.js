@@ -82,7 +82,6 @@ let currentSpotify = null;
 let hasActivity = false;
 let spotifyElapsed = 0;
 let lastUpdate = Date.now();
-let gameStart = null;
 
 function updateProgress() {
   if (!currentSpotify) return;
@@ -102,9 +101,9 @@ function updateProgress() {
 }
 
 function updateTimers() {
-  if (gameStart) {
-    sessionTime.textContent = formatDuration(Date.now() - gameStart);
-  }
+  const now = new Date();
+  const brt = now.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour12: false });
+  sessionTime.textContent = brt;
 
   if (discordStart && hasActivity) {
     dcTime.textContent = formatDuration(Date.now() - discordStart);
@@ -177,13 +176,8 @@ async function fetchStatus() {
         if (discordStart === null || currentGameStart !== act.timestamps.start) {
           discordStart = act.timestamps.start;
           currentGameStart = act.timestamps.start;
-          gameStart = Date.now();
         }
         dcTime.textContent = formatDuration(Date.now() - discordStart);
-        sessionTime.textContent = formatDuration(Date.now() - gameStart);
-      } else {
-        gameStart = null;
-        sessionTime.textContent = "--:--";
       }
 
       let imgUrl = getImageUrl(act.assets, "large_image", appId);
@@ -215,9 +209,7 @@ async function fetchStatus() {
       activityStatus.textContent = "Idle";
       discordStart = null;
       currentGameStart = null;
-      gameStart = null;
       dcTime.textContent = "--:--";
-      sessionTime.textContent = "--:--";
       discordBox.innerHTML = "";
     }
   } catch (err) {
