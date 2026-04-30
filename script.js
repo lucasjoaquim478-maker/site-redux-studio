@@ -121,14 +121,11 @@ let discordStart = null;
 let currentGameStart = null;
 let currentSpotify = null;
 let hasActivity = false;
-let spotifyElapsed = 0;
-let lastUpdate = Date.now();
 
 function updateProgress() {
   if (!currentSpotify) return;
 
-  const now = Date.now();
-  const elapsed = spotifyElapsed + (now - lastUpdate);
+  const elapsed = Date.now() - currentSpotify.timestamps.start;
   const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
 
   if (total <= 0) return;
@@ -178,10 +175,7 @@ async function fetchStatus() {
     if (spotify) {
       currentSpotify = spotify;
       const total = spotify.timestamps.end - spotify.timestamps.start;
-      spotifyElapsed = Date.now() - spotify.timestamps.start;
-      lastUpdate = Date.now();
-      const pct = Math.min(100, Math.max(0, (spotifyElapsed / total) * 100));
-
+      const pct = Math.min(100, Math.max(0, ((Date.now() - spotify.timestamps.start) / total) * 100));
       const timesInitial = formatDuration(Date.now() - spotify.timestamps.start);
       const totalInitial = formatDuration(total);
 
