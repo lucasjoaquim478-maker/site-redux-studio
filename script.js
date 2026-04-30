@@ -128,7 +128,7 @@ async function fetchStatus() {
     const status = kv.discord_status;
     statusEl.className = `status-${status}`;
 
-    const activities = kv.activities.filter(a => a.type !== 4);
+    const activities = kv.activities.filter(a => a.type !== 4 && a.type !== 2);
     const spotify = kv.spotify;
 
     hasActivity = activities.length > 0;
