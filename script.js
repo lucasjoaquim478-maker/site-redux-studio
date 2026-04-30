@@ -8,6 +8,17 @@ const discordBox = document.getElementById("discord-status");
 const sessionTime = document.getElementById("session-time");
 const dcTime = document.getElementById("dc-time");
 const activityStatus = document.getElementById("activity-status");
+const bgMusic = document.getElementById("bg-music");
+bgMusic.volume = 0.15;
+
+let musicPlayed = false;
+document.addEventListener("click", () => {
+  if (!musicPlayed) {
+    bgMusic.play().catch(() => {});
+    musicPlayed = true;
+  }
+}, { once: true });
+
 const copyBtn = document.getElementById("copy");
 const clickSound = document.getElementById("click-sound");
 
