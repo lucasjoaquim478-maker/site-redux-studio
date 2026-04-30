@@ -11,13 +11,30 @@ const activityStatus = document.getElementById("activity-status");
 const bgMusic = document.getElementById("bg-music");
 bgMusic.volume = 0.15;
 
-let musicPlayed = false;
-document.addEventListener("click", () => {
-  if (!musicPlayed) {
-    bgMusic.play().catch(() => {});
-    musicPlayed = true;
-  }
-}, { once: true });
+const enterScreen = document.getElementById("enter-screen");
+const mainContent = document.getElementById("main-content");
+let hasEntered = false;
+
+let timerInterval = null;
+let fetchInterval = null;
+
+function startApp() {
+  timerInterval = setInterval(updateTimers, 1000);
+  fetchStatus();
+  fetchInterval = setInterval(fetchStatus, 10000);
+}
+
+enterScreen.addEventListener("click", () => {
+  if (hasEntered) return;
+  hasEntered = true;
+  bgMusic.play().catch(() => {});
+  enterScreen.classList.add("fade-out");
+  mainContent.classList.add("show");
+  setTimeout(() => {
+    enterScreen.style.display = "none";
+  }, 600);
+  startApp();
+});
 
 const copyBtn = document.getElementById("copy");
 const clickSound = document.getElementById("click-sound");
@@ -129,7 +146,6 @@ function updateTimers() {
   updateProgress();
 }
 
-setInterval(updateTimers, 1000);
 
 async function fetchStatus() {
   try {
@@ -235,8 +251,6 @@ async function fetchStatus() {
   }
 }
 
-fetchStatus();
-setInterval(fetchStatus, 10000);
 
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
