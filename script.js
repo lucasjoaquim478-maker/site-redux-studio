@@ -8,7 +8,6 @@ const discordBox = document.getElementById("discord-status");
 const sessionTime = document.getElementById("session-time");
 const dcTime = document.getElementById("dc-time");
 const activityStatus = document.getElementById("activity-status");
-const bgMusic = document.getElementById("bg-music");
 
 let audioCtx = null;
 let musicNodes = [];
