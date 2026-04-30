@@ -326,12 +326,14 @@ async function fetchStatus() {
 
       const imgHtml = imgUrl ? `<img class="game-img" src="${imgUrl}" alt="Game">` : fallbackHtml;
 
+      const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
+
       discordBox.innerHTML = `
         <div class="dc ${isRoblox ? 'roblox-card' : ''}">
           ${imgHtml}
           <div class="dc-info">
             <div class="game-name">${act.name}</div>
-            <div class="dc-time">${formatDuration(Date.now() - discordStart)}</div>
+            <div class="dc-time">${timeHtml}</div>
           </div>
         </div>
       `;
