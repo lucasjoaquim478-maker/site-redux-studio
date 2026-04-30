@@ -450,10 +450,11 @@ async function fetchStatus() {
       }
 
       let imgHtml = '';
-      if (isRoblox) {
-        imgHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
-      } else if (imgUrl) {
+      if (imgUrl) {
         imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game">';
+      }
+      if (isRoblox && !imgUrl) {
+        imgHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
       }
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
