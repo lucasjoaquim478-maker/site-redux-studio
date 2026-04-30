@@ -450,7 +450,12 @@ async function fetchStatus() {
         // Logo do Roblox
         imgHtml = '<img class="game-img" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png" alt="Roblox" onerror="this.style.display=\'none\'">';
       } else {
-        imgHtml = '';
+        // Mostrar imagem do jogo do Discord
+        let imgUrl = getImageUrl(act.assets, "large_image", appId);
+        if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
+        if (imgUrl) {
+          imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.style.display=\'none\'">';
+        }
       }
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
