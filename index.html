@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0a0a0f">
-  <meta name="description" content="Discord gamer profile with real-time status, Spotify sync, and ambient music">
+  <meta name="description" content="Discord gamer profile with real-time status, Spotify sync">
   <title>Gamer Profile</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
     (function() {
       var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       document.documentElement.classList.add(isTouch ? 'touch' : 'no-touch');
-      if (isTouch) document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     })();
   </script>
 </head>
@@ -21,21 +20,21 @@
 <div class="bg-gradient"></div>
 <canvas id="particles"></canvas>
 
-  <div id="enter-screen" class="enter-screen">
-    <div class="enter-content">
-      <div class="enter-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-      </div>
-      <h1 id="enter-title">Clique para entrar</h1>
-      <p class="enter-subtitle">Entre na experiência</p>
-      <div class="enter-hint">
-        <span class="pulse-dot"></span>
-        <span id="enter-hint-text">Toque em qualquer lugar</span>
-      </div>
+<div id="enter-screen" class="enter-screen">
+  <div class="enter-content">
+    <div class="enter-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+    </div>
+    <h1 id="enter-title">Clique para entrar</h1>
+    <p class="enter-subtitle">Entre na experiência</p>
+    <div class="enter-hint">
+      <span class="pulse-dot"></span>
+      <span id="enter-hint-text">Toque em qualquer lugar</span>
     </div>
   </div>
+</div>
 
 <div id="main-content" class="main-content">
   <div class="card">
@@ -71,17 +70,15 @@
       </div>
     </div>
 
-  <button id="copy" class="btn-glow" aria-label="Copy Discord ID">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="9" y="9" width="13" height="13" rx="2"/>
-      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-    </svg>
-    Copy Discord
-  </button>
+    <button id="copy" class="btn-glow" aria-label="Copy Discord ID">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+      </svg>
+      Copy Discord
+    </button>
   </div>
 </div>
-
-<div id="music-control" class="music-control" style="display:none;"></div>
 
 <div id="music-control" class="music-control" style="display:none;"></div>
 
