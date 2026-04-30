@@ -8,27 +8,34 @@
   <title>Gamer Profile</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      document.documentElement.classList.add(isTouch ? 'touch' : 'no-touch');
+      if (isTouch) document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    })();
+  </script>
 </head>
 <body>
 
 <div class="bg-gradient"></div>
 <canvas id="particles"></canvas>
 
-<div id="enter-screen" class="enter-screen">
-  <div class="enter-content">
-    <div class="enter-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-      </svg>
-    </div>
-    <h1>Clique para entrar</h1>
-    <p class="enter-subtitle">Entre na experiência</p>
-    <div class="enter-hint">
-      <span class="pulse-dot"></span>
-      <span>Toque em qualquer lugar</span>
+  <div id="enter-screen" class="enter-screen">
+    <div class="enter-content">
+      <div class="enter-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <h1 id="enter-title">Clique para entrar</h1>
+      <p class="enter-subtitle">Entre na experiência</p>
+      <div class="enter-hint">
+        <span class="pulse-dot"></span>
+        <span id="enter-hint-text">Toque em qualquer lugar</span>
+      </div>
     </div>
   </div>
-</div>
 
 <div id="main-content" class="main-content">
   <div class="card">

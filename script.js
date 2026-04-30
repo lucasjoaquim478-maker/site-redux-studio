@@ -260,7 +260,18 @@ function startApp() {
 }
 
 if (enterScreen) {
-  enterScreen.addEventListener("click", () => {
+  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  var enterTitle = document.getElementById("enter-title");
+  var enterHintText = document.getElementById("enter-hint-text");
+  if (isTouch) {
+    if (enterTitle) enterTitle.textContent = "Toque para entrar";
+    if (enterHintText) enterHintText.textContent = "Toque em qualquer lugar";
+  } else {
+    if (enterTitle) enterTitle.textContent = "Clique para entrar";
+    if (enterHintText) enterHintText.textContent = "Clique em qualquer lugar";
+  }
+
+  enterScreen.addEventListener(isTouch ? "touchstart" : "click", function handler(e) {
     if (hasEntered) return;
     hasEntered = true;
     setVolume(15);
@@ -270,6 +281,7 @@ if (enterScreen) {
     document.body.style.overflow = "auto";
     setTimeout(() => { enterScreen.style.display = "none"; }, 600);
     startApp();
+    enterScreen.removeEventListener(isTouch ? "touchstart" : "click", handler);
   });
 }
 
@@ -303,6 +315,7 @@ function playClick() {
 }
 
 document.addEventListener("mousedown", (e) => {
+  if (isTouchDevice) return;
   if (e.target.closest(".btn-glow, .track-btn, .volume-slider, .music-control, .spotify, #enter-screen")) return;
   playClick();
 });
@@ -473,6 +486,7 @@ function escapeHtml(str) {
 // ========== PARTICLES ==========
 const canvas = document.getElementById("particles");
 const ctx = canvas ? canvas.getContext("2d") : null;
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 function resize() {
   if (!canvas) return;
@@ -483,7 +497,8 @@ resize();
 window.addEventListener("resize", resize);
 
 const particles = [];
-for (let i = 0; i < 60; i++) {
+var particleCount = isTouchDevice ? 25 : 60;
+for (let i = 0; i < particleCount; i++) {
   particles.push({
     x: Math.random() * (canvas ? canvas.width : 1920),
     y: Math.random() * (canvas ? canvas.height : 1080),
