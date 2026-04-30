@@ -27,7 +27,14 @@ function startApp() {
 enterScreen.addEventListener("click", () => {
   if (hasEntered) return;
   hasEntered = true;
-  bgMusic.play().catch(() => {});
+  bgMusic.load();
+  bgMusic.volume = 0.15;
+  bgMusic.play().catch(err => {
+    console.warn("Audio play failed:", err);
+    bgMusic.src = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
+    bgMusic.load();
+    setTimeout(() => bgMusic.play().catch(() => {}), 500);
+  });
   enterScreen.classList.add("fade-out");
   mainContent.classList.add("show");
   setTimeout(() => {
