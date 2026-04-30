@@ -1,5 +1,29 @@
 const userId = "1109957738387230740";
 
+// YouTube Player
+var ytPlayer;
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('youtube-player', {
+    videoId: '3HjG1Y4QpVA',
+    playerVars: {
+      'autoplay': 1,
+      'controls': 0,
+      'disablekb': 1,
+      'fs': 0,
+      'loop': 1,
+      'playlist': '3HjG1Y4QpVA',
+      'iv_load_policy': 3,
+      'volume': 15
+    },
+    events: {
+      'onReady': function(event) {
+        event.target.setVolume(15);
+        event.target.playVideo();
+      }
+    }
+  });
+}
+
 const avatar = document.getElementById("avatar");
 const username = document.getElementById("username");
 const statusEl = document.getElementById("status-indicator");
