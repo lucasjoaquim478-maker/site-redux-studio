@@ -256,7 +256,7 @@ function startApp() {
   if (fetchInterval) clearInterval(fetchInterval);
   timerInterval = setInterval(updateTimers, 1000);
   fetchStatus();
-  fetchInterval = setInterval(fetchStatus, 10000);
+  fetchInterval = setInterval(fetchStatus, 3000);
 }
 
 if (enterScreen) {
