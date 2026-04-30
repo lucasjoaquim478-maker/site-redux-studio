@@ -81,33 +81,7 @@
   </div>
 </div>
 
-<div id="music-control" class="music-control">
-  <div class="music-handle">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M9 18V5l12-2v13"/>
-      <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-    </svg>
-    <span>Música</span>
-  </div>
-  <div class="music-body">
-    <div class="volume-control">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="vol-icon">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-        <path d="M15.54 8.46a5 5 0 010 7.07"/>
-      </svg>
-      <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="15">
-    </div>
-    <div class="track-control">
-      <button id="prev-track" class="track-btn" aria-label="Previous track">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-      </button>
-      <div class="track-name" id="track-name">Ethereal Waves</div>
-      <button id="next-track" class="track-btn" aria-label="Next track">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
+<div id="music-control" class="music-control" style="display:none;">
 
 <script src="script.js"></script>
 </body>

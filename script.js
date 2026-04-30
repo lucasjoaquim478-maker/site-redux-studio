@@ -257,6 +257,9 @@ function startApp() {
   timerInterval = setInterval(updateTimers, 1000);
   fetchStatus();
   fetchInterval = setInterval(fetchStatus, 3000);
+  // Tocar música relaxante em volume baixo
+  loadTrack(0);
+  setVolume(5);
 }
 
 if (enterScreen) {
@@ -274,12 +277,13 @@ if (enterScreen) {
   enterScreen.addEventListener(isTouch ? "touchstart" : "click", function handler(e) {
     if (hasEntered) return;
     hasEntered = true;
-    setVolume(15);
-    loadTrack(0);
+    setVolume(5);
     enterScreen.classList.add("fade-out");
     mainContent.classList.add("show");
     document.body.style.overflow = "auto";
     setTimeout(() => { enterScreen.style.display = "none"; }, 600);
+    // Tocar música automaticamente após entrar
+    loadTrack(0);
     startApp();
     enterScreen.removeEventListener(isTouch ? "touchstart" : "click", handler);
   });
