@@ -9,71 +9,65 @@ const sessionTime = document.getElementById("session-time");
 const dcTime = document.getElementById("dc-time");
 const activityStatus = document.getElementById("activity-status");
 
+// ========== MUSIC ==========
 let audioCtx = null;
-let musicNodes = [];
+let musicNodes = { master: null };
 let musicPlaying = false;
 let currentMusicVolume = 0.15;
 let currentTrack = 0;
+let activeIntervals = [];
+
+const volumeSlider = document.getElementById("volume-slider");
+const trackName = document.getElementById("track-name");
+const prevBtn = document.getElementById("prev-track");
+const nextBtn = document.getElementById("next-track");
 
 const ambientTracks = [
   {
     name: "Lofi Dream",
     bpm: 70,
-    melody: [
-      [523.25, 659.25, 783.99],
-      [493.88, 587.33, 739.99],
-      [440.00, 523.25, 659.25],
-      [392.00, 493.88, 587.33]
-    ],
+    melody: [[523.25, 659.25, 783.99], [493.88, 587.33, 739.99], [440.00, 523.25, 659.25], [392.00, 493.88, 587.33]],
     bass: [261.63, 246.94, 220.00, 196.00]
   },
   {
     name: "Night Chill",
     bpm: 65,
-    melody: [
-      [440.00, 523.25, 659.25],
-      [392.00, 493.88, 587.33],
-      [349.23, 440.00, 523.25],
-      [293.66, 349.23, 440.00]
-    ],
+    melody: [[440.00, 523.25, 659.25], [392.00, 493.88, 587.33], [349.23, 440.00, 523.25], [293.66, 349.23, 440.00]],
     bass: [220.00, 196.00, 174.61, 146.83]
   },
   {
     name: "Starlight",
     bpm: 75,
-    melody: [
-      [587.33, 739.99, 880.00],
-      [523.25, 659.25, 783.99],
-      [493.88, 587.33, 739.99],
-      [440.00, 523.25, 659.25]
-    ],
+    melody: [[587.33, 739.99, 880.00], [523.25, 659.25, 783.99], [493.88, 587.33, 739.99], [440.00, 523.25, 659.25]],
     bass: [293.66, 261.63, 246.94, 220.00]
   },
   {
     name: "Deep Calm",
     bpm: 60,
-    melody: [
-      [349.23, 440.00, 523.25],
-      [293.66, 392.00, 440.00],
-      [261.63, 349.23, 392.00],
-      [220.00, 293.66, 349.23]
-    ],
+    melody: [[349.23, 440.00, 523.25], [293.66, 392.00, 440.00], [261.63, 349.23, 392.00], [220.00, 293.66, 349.23]],
     bass: [174.61, 146.83, 130.81, 110.00]
   },
   {
     name: "Aurora",
     bpm: 68,
-    melody: [
-      [493.88, 587.33, 739.99],
-      [440.00, 554.37, 659.25],
-      [392.00, 493.88, 587.33],
-      [329.63, 415.30, 493.88]
-    ],
+    melody: [[493.88, 587.33, 739.99], [440.00, 554.37, 659.25], [392.00, 493.88, 587.33], [329.63, 415.30, 493.88]],
     bass: [246.94, 220.00, 196.00, 164.81]
   }
 ];
 
-let activeIntervals = [];
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicNodes.master = audioCtx.createGain();
+  musicNodes.master.gain.value = currentMusicVolume;
+  musicNodes.master.connect(audioCtx.destination);
+}
+
+function setVolume(val) {
+  currentMusicVolume = val / 100;
+  if (volumeSlider) volumeSlider.value = val;
+  if (musicNodes.master) musicNodes.master.gain.setTargetAtTime(currentMusicVolume, audioCtx.currentTime, 0.1);
+}
 
 function stopMusic() {
   musicPlaying = false;
@@ -85,13 +79,50 @@ function stopMusic() {
   musicNodes.allOsc = [];
 }
 
+function playNote(freq, duration, vol) {
+  if (!musicPlaying || !audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  osc2.type = "triangle";
+  osc2.frequency.value = freq;
+  osc2.detune.value = 3;
+
+  filter.type = "lowpass";
+  filter.frequency.value = 1200;
+  filter.Q.value = 0.7;
+
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(vol, now + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicNodes.master);
+
+  osc.start(now);
+  osc.stop(now + duration + 0.1);
+  osc2.start(now);
+  osc2.stop(now + duration + 0.1);
+
+  musicNodes.allOsc.push(osc, osc2);
+}
+
 function playAmbient(trackIndex) {
   initAudio();
   if (audioCtx.state === "suspended") audioCtx.resume();
 
   stopMusic();
   musicPlaying = true;
-  if (!musicNodes.allOsc) musicNodes.allOsc = [];
+  musicNodes.allOsc = [];
 
   currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
   const track = ambientTracks[currentTrack];
@@ -100,7 +131,6 @@ function playAmbient(trackIndex) {
   const bpm = track.bpm;
   const beatTime = 60 / bpm;
 
-  const master = musicNodes.master;
   const pad = audioCtx.createOscillator();
   const padGain = audioCtx.createGain();
   const padFilter = audioCtx.createBiquadFilter();
@@ -113,7 +143,7 @@ function playAmbient(trackIndex) {
 
   pad.connect(padFilter);
   padFilter.connect(padGain);
-  padGain.connect(master);
+  padGain.connect(musicNodes.master);
   pad.start();
   musicNodes.allOsc.push(pad);
 
@@ -155,162 +185,14 @@ function playAmbient(trackIndex) {
   playBeat();
 }
 
-function playNote(freq, duration, vol) {
-  if (!musicPlaying || !audioCtx) return;
-
-  const osc = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-
-  osc.type = "sine";
-  osc.frequency.value = freq;
-
-  osc2.type = "triangle";
-  osc2.frequency.value = freq;
-  osc2.detune.value = 3;
-
-  filter.type = "lowpass";
-  filter.frequency.value = 1200;
-  filter.Q.value = 0.7;
-
-  const now = audioCtx.currentTime;
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(vol, now + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-  osc.connect(filter);
-  osc2.connect(filter);
-  filter.connect(gain);
-  gain.connect(musicNodes.master);
-
-  osc.start(now);
-  osc.stop(now + duration + 0.1);
-  osc2.start(now);
-  osc2.stop(now + duration + 0.1);
-
-  musicNodes.allOsc.push(osc, osc2);
-}
-
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  musicNodes.master = audioCtx.createGain();
-  musicNodes.master.gain.value = currentMusicVolume;
-  musicNodes.master.connect(audioCtx.destination);
-}
-
-function stopMusic() {
-  musicPlaying = false;
-  musicNodes.chords?.forEach(n => { try { n.stop(); } catch(e) {} });
-  musicNodes.chords = [];
-  musicNodes.fx?.forEach(n => { try { n.stop(); } catch(e) {} });
-  musicNodes.fx = [];
-}
-
-function playAmbient(trackIndex) {
-  initAudio();
-
-  if (audioCtx.state === "suspended") audioCtx.resume();
-
-  stopMusic();
-  musicPlaying = true;
-  currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
-  const track = ambientTracks[currentTrack];
-  trackName.textContent = track.name;
-
-  const chords = track.chords;
-  const waveType = track.wave;
-  const tempo = track.tempo;
-  const detuneVal = track.detune || 5;
-  const filterFreq = track.filter || 800;
-
-  musicNodes.chords = [];
-
-  function playChordLoop() {
-    if (!musicPlaying) return;
-
-    chords.forEach((freq, i) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-
-      osc.type = waveType;
-      osc.frequency.value = freq;
-      osc.detune.value = (Math.random() - 0.5) * detuneVal;
-
-      filter.type = "lowpass";
-      filter.frequency.value = filterFreq;
-      filter.Q.value = 0.5;
-
-      const now = audioCtx.currentTime;
-      const noteLen = tempo / 1000;
-      const startOffset = i * (tempo / 1000) * 0.25;
-
-      gain.gain.setValueAtTime(0, now + startOffset);
-      gain.gain.linearRampToValueAtTime(0.12, now + startOffset + noteLen * 0.4);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + startOffset + noteLen * 1.8);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(musicNodes.master);
-
-      osc.start(now + startOffset);
-      osc.stop(now + startOffset + noteLen * 1.8);
-      musicNodes.chords.push(osc);
-    });
-
-    if (musicPlaying) {
-      setTimeout(playChordLoop, tempo * 2);
-    }
-  }
-
-  if (!musicNodes.fx) musicNodes.fx = [];
-
-  const pad = audioCtx.createOscillator();
-  const padGain = audioCtx.createGain();
-  const padFilter = audioCtx.createBiquadFilter();
-
-  pad.type = "sine";
-  pad.frequency.value = chords[0] / 2;
-
-  padFilter.type = "lowpass";
-  padFilter.frequency.value = filterFreq * 0.5;
-
-  padGain.gain.value = 0.04;
-
-  pad.connect(padFilter);
-  padFilter.connect(padGain);
-  padGain.connect(musicNodes.master);
-  pad.start();
-  musicNodes.fx.push(pad);
-
-  const lfo = audioCtx.createOscillator();
-  const lfoGain = audioCtx.createGain();
-  lfo.frequency.value = 0.2;
-  lfoGain.gain.value = filterFreq * 0.3;
-  lfo.connect(lfoGain);
-  lfoGain.connect(padFilter.frequency);
-  lfo.start();
-  musicNodes.fx.push(lfo);
-
-  playChordLoop();
-}
-
-function playMusic() {
-  playAmbient(currentTrack);
-  trackName.textContent = ambientTracks[currentTrack].name;
-}
-
 function loadTrack(index) {
   playAmbient(index);
 }
 
-volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
-prevBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack - 1); });
-nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack + 1); });
-
-trackName.addEventListener("click", (e) => {
+if (volumeSlider) volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
+if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack - 1); });
+if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack + 1); });
+if (trackName) trackName.addEventListener("click", (e) => {
   e.stopPropagation();
   if (musicPlaying) {
     stopMusic();
@@ -320,56 +202,58 @@ trackName.addEventListener("click", (e) => {
   }
 });
 
-// DRAG
+// ========== DRAG MUSIC CONTROL ==========
 const musicControl = document.getElementById("music-control");
-const musicHandle = musicControl.querySelector(".music-handle");
+const musicHandle = musicControl ? musicControl.querySelector(".music-handle") : null;
 
-let isDragging = false;
-let dragX = 0, dragY = 0;
+if (musicControl && musicHandle) {
+  let isDragging = false;
+  let dragX = 0, dragY = 0;
 
-musicHandle.addEventListener("mousedown", startDrag);
-musicHandle.addEventListener("touchstart", startDrag, { passive: false });
+  musicHandle.addEventListener("mousedown", startDrag);
+  musicHandle.addEventListener("touchstart", startDrag, { passive: false });
 
-function startDrag(e) {
-  e.preventDefault();
-  isDragging = true;
-  musicControl.classList.add("dragging");
+  function startDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    musicControl.classList.add("dragging");
 
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rect = musicControl.getBoundingClientRect();
+    dragX = clientX - rect.left;
+    dragY = clientY - rect.top;
 
-  const rect = musicControl.getBoundingClientRect();
-  dragX = clientX - rect.left;
-  dragY = clientY - rect.top;
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  }
 
-  document.addEventListener("mousemove", onDrag);
-  document.addEventListener("mouseup", stopDrag);
-  document.addEventListener("touchmove", onDrag, { passive: false });
-  document.addEventListener("touchend", stopDrag);
+  function onDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    musicControl.style.left = (clientX - dragX) + "px";
+    musicControl.style.top = (clientY - dragY) + "px";
+    musicControl.style.right = "auto";
+    musicControl.style.bottom = "auto";
+  }
+
+  function stopDrag() {
+    isDragging = false;
+    musicControl.classList.remove("dragging");
+    document.removeEventListener("mousemove", onDrag);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
+  }
 }
 
-function onDrag(e) {
-  if (!isDragging) return;
-  e.preventDefault();
-
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-  musicControl.style.left = (clientX - dragX) + "px";
-  musicControl.style.top = (clientY - dragY) + "px";
-  musicControl.style.right = "auto";
-  musicControl.style.bottom = "auto";
-}
-
-function stopDrag() {
-  isDragging = false;
-  musicControl.classList.remove("dragging");
-  document.removeEventListener("mousemove", onDrag);
-  document.removeEventListener("mouseup", stopDrag);
-  document.removeEventListener("touchmove", onDrag);
-  document.removeEventListener("touchend", stopDrag);
-}
-
+// ========== ENTER SCREEN ==========
 const enterScreen = document.getElementById("enter-screen");
 const mainContent = document.getElementById("main-content");
 let hasEntered = false;
@@ -383,47 +267,59 @@ function startApp() {
   fetchInterval = setInterval(fetchStatus, 10000);
 }
 
-enterScreen.addEventListener("click", () => {
-  if (hasEntered) return;
-  hasEntered = true;
-  loadTrack(0);
-  setVolume(15);
-  enterScreen.classList.add("fade-out");
-  mainContent.classList.add("show");
-  document.body.style.overflow = "auto";
-  setTimeout(() => {
-    enterScreen.style.display = "none";
-  }, 600);
-  startApp();
-});
+if (enterScreen) {
+  enterScreen.addEventListener("click", () => {
+    if (hasEntered) return;
+    hasEntered = true;
+    loadTrack(0);
+    setVolume(15);
+    enterScreen.classList.add("fade-out");
+    mainContent.classList.add("show");
+    document.body.style.overflow = "auto";
+    setTimeout(() => {
+      enterScreen.style.display = "none";
+    }, 600);
+    startApp();
+  });
+}
 
+// ========== SPOTIFY CLICK ==========
 const copyBtn = document.getElementById("copy");
 const clickSound = document.getElementById("click-sound");
 
-spotifyBox.addEventListener("click", () => {
+let currentSpotify = null;
+let hasActivity = false;
+let spotifyOffset = 0;
+
+if (spotifyBox) spotifyBox.addEventListener("click", () => {
   if (currentSpotify?.track_id) {
     window.open(`https://open.spotify.com/track/${currentSpotify.track_id}`, "_blank");
   }
 });
 
-document.addEventListener("mousedown", () => {
-  clickSound.currentTime = 0;
-  clickSound.play().catch(() => {});
-});
-
-copyBtn.addEventListener("click", () => {
-  navigator.clipboard.writeText(userId).then(() => {
-    const original = copyBtn.innerHTML;
-    copyBtn.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-      Copied!
-    `;
-    setTimeout(() => (copyBtn.innerHTML = original), 2000);
+if (clickSound) {
+  document.addEventListener("mousedown", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
   });
-});
+}
 
+if (copyBtn) {
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(userId).then(() => {
+      const original = copyBtn.innerHTML;
+      copyBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Copied!
+      `;
+      setTimeout(() => (copyBtn.innerHTML = original), 2000);
+    });
+  });
+}
+
+// ========== UTILS ==========
 function formatDuration(ms) {
   const totalSec = Math.floor(ms / 1000);
   const h = Math.floor(totalSec / 3600);
@@ -445,12 +341,10 @@ function getImageUrl(assets, key, appId) {
   return `https://cdn.discordapp.com/app-assets/${appId}/${raw}.png`;
 }
 
+// ========== STATE ==========
 let sessionStart = Date.now();
 let discordStart = null;
 let currentGameStart = null;
-let currentSpotify = null;
-let hasActivity = false;
-let spotifyOffset = 0;
 
 function updateProgress() {
   if (!currentSpotify) return;
@@ -480,7 +374,7 @@ function updateTimers() {
   updateProgress();
 }
 
-
+// ========== DISCORD STATUS ==========
 async function fetchStatus() {
   try {
     const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
@@ -507,7 +401,6 @@ async function fetchStatus() {
 
       const serverTime = Date.now();
       const localOffset = serverTime - spotify.timestamps.start;
-      const expectedDuration = spotify.timestamps.end - spotify.timestamps.start;
 
       spotifyOffset = 0;
 
@@ -529,8 +422,6 @@ async function fetchStatus() {
           </div>
         </div>
       `;
-
-      console.log("Spotify:", spotify.song, "| Total:", total, "| Pct:", pct);
     } else {
       currentSpotify = null;
       spotifyBox.innerHTML = "";
@@ -591,7 +482,7 @@ async function fetchStatus() {
   }
 }
 
-
+// ========== PARTICLES ==========
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 

@@ -29,60 +29,48 @@
 </div>
 
 <div id="main-content" class="main-content">
-
-<div class="card">
-
-  <div class="card-header">
-    <div class="avatar-box">
-      <div class="avatar-glow"></div>
-      <img id="avatar" class="avatar" alt="Avatar">
-      <div id="status-indicator"></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="avatar-box">
+        <div class="avatar-glow"></div>
+        <img id="avatar" class="avatar" alt="Avatar">
+        <div id="status-indicator"></div>
+      </div>
+      <div class="user-info">
+        <h1 id="username">@loading</h1>
+        <p class="bio"><span class="badge">Gamer</span><span class="badge">Dev</span></p>
+      </div>
     </div>
-    <div class="user-info">
-      <h1 id="username">@loading</h1>
-      <p class="bio"><span class="badge">Gamer</span><span class="badge">Dev</span></p>
+
+    <div class="divider"></div>
+
+    <div id="spotify-box" class="section-box"></div>
+    <div id="discord-status" class="section-box"></div>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">Horário</span>
+        <span id="session-time" class="stat-value">00:00</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Discord</span>
+        <span id="dc-time" class="stat-value">--:--</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Status</span>
+        <span id="activity-status" class="stat-value">Loading...</span>
+      </div>
     </div>
+
+    <button id="copy" class="btn-glow">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+      </svg>
+      Copy Discord
+    </button>
   </div>
-
-  <div class="divider"></div>
-
-  <div id="spotify-box" class="section-box"></div>
-
-  <div id="discord-status" class="section-box"></div>
-
-  <div class="stats">
-    <div class="stat">
-      <span class="stat-label">Horário</span>
-      <span id="session-time" class="stat-value">00:00</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Discord</span>
-      <span id="dc-time" class="stat-value">--:--</span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Status</span>
-      <span id="activity-status" class="stat-value">Loading...</span>
-    </div>
-  </div>
-
-  <button id="copy" class="btn-glow">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="9" y="9" width="13" height="13" rx="2"/>
-      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-    </svg>
-    Copy Discord
-  </button>
-
 </div>
-
-<div id="cursor"></div>
-<div id="cursor-trail"></div>
-
-</div>
-
-<audio id="click-sound">
-  <source src="click.mp3">
-</audio>
 
 <div id="music-control" class="music-control">
   <div class="music-handle">
@@ -104,13 +92,17 @@
       <button id="prev-track" class="track-btn">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-      <div class="track-name" id="track-name">Lofi Study</div>
+      <div class="track-name" id="track-name">Lofi Dream</div>
       <button id="next-track" class="track-btn">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
     </div>
   </div>
 </div>
+
+<audio id="click-sound">
+  <source src="click.mp3">
+</audio>
 
 <script src="script.js"></script>
 </body>
