@@ -1,12 +1,5 @@
 const userId = "1109957738387230740";
 
-// Áudio relaxante de fundo
-let bgMusic = new Audio();
-bgMusic.src = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=relaxing-piano-amp-flute-116997.mp3";
-bgMusic.volume = 0.15;
-bgMusic.loop = true;
-bgMusic.style.display = "none";
-
 const avatar = document.getElementById("avatar");
 const username = document.getElementById("username");
 const statusEl = document.getElementById("status-indicator");
