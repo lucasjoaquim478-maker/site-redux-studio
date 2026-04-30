@@ -226,17 +226,26 @@ body {
   z-index: 2;
 }
 
+#status-indicator.status-idle {
+  border-color: transparent;
+  width: 18px;
+  height: 18px;
+  bottom: 0;
+  right: 0;
+}
+
 .status-online { background: #23a55a; box-shadow: 0 0 8px #23a55a; }
-.status-idle { background: #f0b232; box-shadow: 0 0 8px #f0b232; }
+.status-idle { background: transparent; box-shadow: none; }
 .status-dnd { background: #f23f43; box-shadow: 0 0 8px #f23f43; }
 .status-offline { background: #80848e; }
 
 .status-idle::after {
   content: "🌙";
   position: absolute;
-  font-size: 8px;
-  top: -2px;
-  right: -8px;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   line-height: 1;
 }
 
