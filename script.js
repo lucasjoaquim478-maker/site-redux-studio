@@ -43,6 +43,9 @@ function killAll() {
   activeTimers = [];
   allSounds.forEach(s => { try { s.stop(); } catch(e) {} });
   allSounds = [];
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
 }
 
 function tone(freq, dur, vol, type) {
@@ -249,6 +252,8 @@ let fetchInterval = null;
 
 function startApp() {
   updateTimers();
+  if (timerInterval) clearInterval(timerInterval);
+  if (fetchInterval) clearInterval(fetchInterval);
   timerInterval = setInterval(updateTimers, 1000);
   fetchStatus();
   fetchInterval = setInterval(fetchStatus, 10000);
@@ -453,6 +458,8 @@ async function fetchStatus() {
   } catch (err) {
     console.error("Lanyard error:", err);
     if (activityStatus) activityStatus.textContent = "Error";
+    if (spotifyBox) spotifyBox.innerHTML = '<div class="spotify spotify-error">Status unavailable</div>';
+    if (discordBox) discordBox.innerHTML = '<div class="dc dc-error">Discord offline</div>';
   }
 }
 
