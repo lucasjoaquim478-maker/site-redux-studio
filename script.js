@@ -452,14 +452,15 @@ async function fetchStatus() {
       } else {
         let imgUrl = getImageUrl(act.assets, "large_image", appId);
         if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
-        // Verificar visuals apenas se for URL válida
+        // Verificar visuals apenas se for URL HTTPS válida
         if (!imgUrl && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
           const visualUrl = kv.visuals.activity_images[appId];
-          if (visualUrl && visualUrl.startsWith("http")) {
+          if (visualUrl && typeof visualUrl === "string" && visualUrl.startsWith("https://")) {
             imgUrl = visualUrl;
           }
         }
-        if (imgUrl) {
+        // Só usar se for URL HTTPS válida
+        if (imgUrl && typeof imgUrl === "string" && imgUrl.startsWith("https://")) {
           imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game">';
         }
       }
