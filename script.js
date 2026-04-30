@@ -450,7 +450,8 @@ async function fetchStatus() {
       }
 
       let fallbackHtml = '';
-      if (isRoblox) {
+      if (isRoblox && !imgUrl) {
+        imgUrl = "https://tr.rbxcdn.com/7aa3caa3c1fe2b4c5cec4e04c1f978c/150/150/Image/Png";
         fallbackHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
       }
       const imgHtml = imgUrl ? '<img class="game-img" src="' + imgUrl + '" alt="Game" onerror="this.style.display=\'none\';if(this.nextElementSibling)this.nextElementSibling.style.display=\'flex\'">' + fallbackHtml : fallbackHtml;
