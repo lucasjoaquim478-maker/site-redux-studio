@@ -268,11 +268,11 @@ function startApp() {
 }
 
 if (enterScreen) {
-  enterScreen.addEventListener("click", () => {
-    if (hasEntered) return;
-    hasEntered = true;
-    loadTrack(0);
-    setVolume(15);
+enterScreen.addEventListener("click", () => {
+  if (hasEntered) return;
+  hasEntered = true;
+  setVolume(15);
+  loadTrack(0);
     enterScreen.classList.add("fade-out");
     mainContent.classList.add("show");
     document.body.style.overflow = "auto";
