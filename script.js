@@ -447,8 +447,8 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // Para Roblox - texto simples
-        imgHtml = '<div class="game-img">ROBLOX</div>';
+        // Logo do Roblox
+        imgHtml = '<img class="game-img" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png" alt="Roblox" onerror="this.style.display=\'none\'">';
       } else {
         imgHtml = '';
       }
