@@ -9,57 +9,142 @@ const sessionTime = document.getElementById("session-time");
 const dcTime = document.getElementById("dc-time");
 const activityStatus = document.getElementById("activity-status");
 const bgMusic = document.getElementById("bg-music");
-bgMusic.volume = 0.15;
 
-const tracks = [
-  { url: "https://cdn.pixabay.com/download/audio/2024/06/23/audio_8b04b8bf1d.mp3", name: "Chill Beat" },
-  { url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_20968c4e95.mp3", name: "Lo-Fi Chill" },
-  { url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_3a71d65342.mp3", name: "Lofi Beat" },
-  { url: "https://cdn.pixabay.com/download/audio/2023/01/16/audio_5587cc3944.mp3", name: "Calm Night" },
-  { url: "https://cdn.pixabay.com/download/audio/2024/03/05/audio_1e0e87b8e8.mp3", name: "Dreamy Nights" }
+let audioCtx = null;
+let musicNodes = [];
+let musicPlaying = false;
+let currentMusicVolume = 0.15;
+let currentTrack = 0;
+
+const ambientTracks = [
+  { name: "Ambient Dream", chords: [261.63, 329.63, 392.00, 493.88], tempo: 2000, wave: "sine" },
+  { name: "Chill Wave", chords: [293.66, 349.23, 440.00, 523.25], tempo: 2500, wave: "triangle" },
+  { name: "Night Sky", chords: [329.63, 415.30, 493.88, 659.25], tempo: 3000, wave: "sine" },
+  { name: "Deep Calm", chords: [196.00, 246.94, 293.66, 392.00], tempo: 2200, wave: "sine" },
+  { name: "Starlight", chords: [246.94, 293.66, 369.99, 493.88], tempo: 1800, wave: "triangle" }
 ];
 
-let currentTrack = 0;
 const volumeSlider = document.getElementById("volume-slider");
 const trackName = document.getElementById("track-name");
 const prevBtn = document.getElementById("prev-track");
 const nextBtn = document.getElementById("next-track");
 
 function setVolume(val) {
-  bgMusic.volume = val / 100;
+  currentMusicVolume = val / 100;
   if (volumeSlider) volumeSlider.value = val;
+  if (musicNodes.master) musicNodes.master.gain.setTargetAtTime(currentMusicVolume, audioCtx.currentTime, 0.1);
+}
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicNodes.master = audioCtx.createGain();
+  musicNodes.master.gain.value = currentMusicVolume;
+  musicNodes.master.connect(audioCtx.destination);
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  musicNodes.chords?.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes.chords = [];
+  musicNodes.fx?.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes.fx = [];
+}
+
+function playAmbient(trackIndex) {
+  initAudio();
+
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  stopMusic();
+  musicPlaying = true;
+  currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
+  const track = ambientTracks[currentTrack];
+  trackName.textContent = track.name;
+
+  const chords = track.chords;
+  const waveType = track.wave;
+  const tempo = track.tempo;
+
+  musicNodes.chords = [];
+
+  function playChordLoop() {
+    if (!musicPlaying) return;
+
+    chords.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      osc.type = waveType;
+      osc.frequency.value = freq;
+      osc.detune.value = (Math.random() - 0.5) * 10;
+
+      filter.type = "lowpass";
+      filter.frequency.value = 800;
+      filter.Q.value = 1;
+
+      const now = audioCtx.currentTime;
+      const noteLen = tempo / 1000;
+      const startOffset = i * (tempo / 1000) * 0.3;
+
+      gain.gain.setValueAtTime(0, now + startOffset);
+      gain.gain.linearRampToValueAtTime(0.15, now + startOffset + noteLen * 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + startOffset + noteLen * 1.5);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(musicNodes.master);
+
+      osc.start(now + startOffset);
+      osc.stop(now + startOffset + noteLen * 1.5);
+      musicNodes.chords.push(osc);
+    });
+
+    if (musicPlaying) {
+      setTimeout(playChordLoop, tempo * 2);
+    }
+  }
+
+  if (!musicNodes.fx) musicNodes.fx = [];
+
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  const padFilter = audioCtx.createBiquadFilter();
+
+  pad.type = "sine";
+  pad.frequency.value = chords[0] / 2;
+
+  padFilter.type = "lowpass";
+  padFilter.frequency.value = 400;
+
+  padGain.gain.value = 0.05;
+
+  pad.connect(padFilter);
+  padFilter.connect(padGain);
+  padGain.connect(musicNodes.master);
+  pad.start();
+  musicNodes.fx.push(pad);
+
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 0.3;
+  lfoGain.gain.value = 100;
+  lfo.connect(lfoGain);
+  lfoGain.connect(padFilter.frequency);
+  lfo.start();
+  musicNodes.fx.push(lfo);
+
+  playChordLoop();
 }
 
 function playMusic() {
-  bgMusic.play().then(() => {
-    trackName.textContent = tracks[currentTrack].name;
-  }).catch(err => {
-    console.log("Autoplay blocked:", err);
-    trackName.textContent = "Pausado";
-  });
+  playAmbient(currentTrack);
+  trackName.textContent = ambientTracks[currentTrack].name;
 }
 
 function loadTrack(index) {
-  currentTrack = ((index % tracks.length) + tracks.length) % tracks.length;
-  const track = tracks[currentTrack];
-  trackName.textContent = "Carregando...";
-
-  bgMusic.oncanplaythrough = null;
-  bgMusic.onerror = null;
-
-  bgMusic.src = track.url;
-
-  bgMusic.oncanplaythrough = () => {
-    playMusic();
-  };
-
-  bgMusic.onerror = (e) => {
-    console.error("Track error:", currentTrack, e);
-    trackName.textContent = "Falhou...";
-    setTimeout(() => loadTrack(currentTrack + 1), 2000);
-  };
-
-  bgMusic.load();
+  playAmbient(index);
 }
 
 volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
@@ -68,11 +153,11 @@ nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(curren
 
 trackName.addEventListener("click", (e) => {
   e.stopPropagation();
-  if (bgMusic.paused) {
-    playMusic();
-  } else {
-    bgMusic.pause();
+  if (musicPlaying) {
+    stopMusic();
     trackName.textContent = "Pausado";
+  } else {
+    playAmbient(currentTrack);
   }
 });
 
