@@ -762,6 +762,12 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.track-name:hover {
+  color: var(--primary);
 }
 
 @media (max-width: 480px) {

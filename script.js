@@ -12,11 +12,11 @@ const bgMusic = document.getElementById("bg-music");
 bgMusic.volume = 0.15;
 
 const tracks = [
-  { url: "https://cdn.pixabay.com/download/audio/2024/06/23/audio_8b04b8bf1d.mp3?filename=chill-beat-228958.mp3", name: "Chill Beat" },
-  { url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_20968c4e95.mp3?filename=lo-fi-chill-186399.mp3", name: "Lo-Fi Chill" },
-  { url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_3a71d65342.mp3?filename=lofi-beat-127728.mp3", name: "Lofi Beat" },
-  { url: "https://cdn.pixabay.com/download/audio/2023/01/16/audio_5587cc3944.mp3?filename=calm-night-144313.mp3", name: "Calm Night" },
-  { url: "https://cdn.pixabay.com/download/audio/2024/03/05/audio_1e0e87b8e8.mp3?filename=dreamy-nights-237412.mp3", name: "Dreamy Nights" }
+  { url: "https://cdn.pixabay.com/download/audio/2024/06/23/audio_8b04b8bf1d.mp3", name: "Chill Beat" },
+  { url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_20968c4e95.mp3", name: "Lo-Fi Chill" },
+  { url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_3a71d65342.mp3", name: "Lofi Beat" },
+  { url: "https://cdn.pixabay.com/download/audio/2023/01/16/audio_5587cc3944.mp3", name: "Calm Night" },
+  { url: "https://cdn.pixabay.com/download/audio/2024/03/05/audio_1e0e87b8e8.mp3", name: "Dreamy Nights" }
 ];
 
 let currentTrack = 0;
@@ -27,32 +27,54 @@ const nextBtn = document.getElementById("next-track");
 
 function setVolume(val) {
   bgMusic.volume = val / 100;
-  volumeSlider.value = val;
+  if (volumeSlider) volumeSlider.value = val;
+}
+
+function playMusic() {
+  bgMusic.play().then(() => {
+    trackName.textContent = tracks[currentTrack].name;
+  }).catch(err => {
+    console.log("Autoplay blocked:", err);
+    trackName.textContent = "Pausado";
+  });
 }
 
 function loadTrack(index) {
   currentTrack = ((index % tracks.length) + tracks.length) % tracks.length;
-  bgMusic.src = tracks[currentTrack].url;
+  const track = tracks[currentTrack];
   trackName.textContent = "Carregando...";
-  bgMusic.load();
 
-  bgMusic.oncanplay = () => {
-    trackName.textContent = tracks[currentTrack].name;
-    bgMusic.play().catch(() => {
-      trackName.textContent = "Clique para tocar";
-    });
+  bgMusic.oncanplaythrough = null;
+  bgMusic.onerror = null;
+
+  bgMusic.src = track.url;
+
+  bgMusic.oncanplaythrough = () => {
+    playMusic();
   };
 
-  bgMusic.onerror = () => {
-    trackName.textContent = "Erro ao carregar";
+  bgMusic.onerror = (e) => {
+    console.error("Track error:", currentTrack, e);
+    trackName.textContent = "Falhou...";
     setTimeout(() => loadTrack(currentTrack + 1), 2000);
   };
+
+  bgMusic.load();
 }
 
-volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));
-prevBtn.addEventListener("click", () => loadTrack(currentTrack - 1));
-nextBtn.addEventListener("click", () => loadTrack(currentTrack + 1));
-trackName.textContent = tracks[currentTrack].name;
+volumeSlider.addEventListener("input", (e) => { e.stopPropagation(); setVolume(volumeSlider.value); });
+prevBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack - 1); });
+nextBtn.addEventListener("click", (e) => { e.stopPropagation(); loadTrack(currentTrack + 1); });
+
+trackName.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (bgMusic.paused) {
+    playMusic();
+  } else {
+    bgMusic.pause();
+    trackName.textContent = "Pausado";
+  }
+});
 
 // DRAG
 const musicControl = document.getElementById("music-control");
