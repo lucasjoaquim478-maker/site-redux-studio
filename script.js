@@ -394,7 +394,7 @@ async function fetchStatus() {
 
     if (user.avatar && user.avatar.startsWith("a_")) {
       avatar.src = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".gif";
-    } else if (user.avatar) {
+    } else if (user.avatar && user.avatar.match(/^\w+$/)) {
       avatar.src = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
     } else {
       const defaultIndex = Number((BigInt(user.id) >> 22n) % 6n);
