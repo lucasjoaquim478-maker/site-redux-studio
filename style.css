@@ -180,6 +180,12 @@ body {
   animation: cardFloat 0.8s ease-out;
 }
 
+.no-touch .card {
+  max-width: 440px;
+  padding: 32px;
+  border-radius: 28px;
+}
+
 .no-touch .card:hover {
   transform: translateY(-4px);
   box-shadow:
@@ -239,6 +245,12 @@ body {
   object-fit: cover;
 }
 
+.no-touch .avatar {
+  width: 100px;
+  height: 100px;
+  border-width: 4px;
+}
+
 #status-indicator {
   position: absolute;
   bottom: 2px;
@@ -281,6 +293,10 @@ body {
   text-shadow: 0 0 20px var(--primary-glow);
 }
 
+.no-touch .user-info h1 {
+  font-size: 1.5rem;
+}
+
 .bio {
   display: flex;
   gap: 6px;
@@ -319,6 +335,25 @@ body {
   cursor: var(--cursor);
 }
 
+.no-touch .spotify {
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.spotify img {
+  width: 54px;
+  height: 54px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.no-touch .spotify img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
 .spotify:hover {
   transform: scale(1.02);
 }
@@ -344,10 +379,19 @@ body {
   text-overflow: ellipsis;
 }
 
+.no-touch .spotify-info .title {
+  font-size: 0.9rem;
+}
+
 .spotify-info .artist {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 2px;
+}
+
+.no-touch .spotify-info .artist {
+  font-size: 0.8rem;
+  margin-top: 4px;
 }
 
 .spotify-times {
@@ -385,6 +429,36 @@ body {
   overflow: hidden;
   transition: transform 0.2s ease;
   position: relative;
+}
+
+.no-touch .dc {
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.dc:hover {
+  transform: scale(1.01);
+}
+
+.dc.roblox-card {
+  background: linear-gradient(135deg, rgba(226, 35, 22, 0.1), rgba(255, 107, 107, 0.05));
+  border: 1px solid rgba(226, 35, 22, 0.2);
+}
+
+.game-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+
+.no-touch .game-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
 }
 
 .dc:hover {
@@ -466,6 +540,11 @@ body {
   margin-top: 8px;
 }
 
+.no-touch .stats {
+  gap: 16px;
+  margin-top: 12px;
+}
+
 .stat {
   display: flex;
   flex-direction: column;
@@ -475,11 +554,20 @@ body {
   border-radius: 12px;
 }
 
+.no-touch .stat {
+  padding: 16px 12px;
+  border-radius: 14px;
+}
+
 .stat-label {
   font-size: 0.65rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.no-touch .stat-label {
+  font-size: 0.7rem;
 }
 
 .stat-value {
@@ -488,6 +576,11 @@ body {
   font-family: 'JetBrains Mono', monospace;
   color: var(--primary);
   margin-top: 4px;
+}
+
+.no-touch .stat-value {
+  font-size: 1rem;
+  margin-top: 6px;
 }
 
 /* ========== BUTTON ========== */
@@ -509,6 +602,13 @@ body {
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.no-touch .btn-glow {
+  padding: 14px;
+  font-size: 0.9rem;
+  border-radius: 16px;
+  margin-top: 24px;
 }
 
 .btn-glow::before {
@@ -549,6 +649,13 @@ body {
   transition: box-shadow 0.2s ease;
 }
 
+.no-touch .music-control {
+  width: 180px;
+  top: 20px;
+  right: 20px;
+  border-radius: 14px;
+}
+
 .music-control:hover {
   box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
 }
@@ -579,14 +686,28 @@ body {
   border-radius: 12px 12px 0 0;
 }
 
+.no-touch .music-handle {
+  padding: 10px 12px;
+  font-size: 0.7rem;
+}
+
 .music-handle svg {
   width: 12px;
   height: 12px;
   opacity: 0.5;
 }
 
+.no-touch .music-handle svg {
+  width: 14px;
+  height: 14px;
+}
+
 .music-body {
   padding: 10px;
+}
+
+.no-touch .music-body {
+  padding: 12px;
 }
 
 .volume-control {
@@ -662,6 +783,12 @@ body {
   flex-shrink: 0;
 }
 
+.no-touch .track-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
 .track-btn:hover {
   background: rgba(0, 255, 204, 0.15);
   transform: scale(1.05);
@@ -676,6 +803,11 @@ body {
   height: 11px;
 }
 
+.no-touch .track-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
 .track-name {
   flex: 1;
   font-size: 0.6rem;
@@ -687,6 +819,10 @@ body {
   font-family: 'JetBrains Mono', monospace;
   cursor: pointer;
   transition: color 0.2s ease;
+}
+
+.no-touch .track-name {
+  font-size: 0.65rem;
 }
 
 .track-name:hover {
