@@ -206,6 +206,12 @@ if (enterScreen) {
     mainContent.classList.add("show");
     document.body.style.overflow = "auto";
     setTimeout(() => { enterScreen.style.display = "none"; }, 600);
+    // Tocar música de fundo
+    const bgMusic = document.getElementById("bg-music");
+    if (bgMusic) {
+      bgMusic.volume = 0.15;
+      bgMusic.play().catch(() => {});
+    }
     startApp();
     enterScreen.removeEventListener(isTouch ? "touchstart" : "click", handler);
   });
