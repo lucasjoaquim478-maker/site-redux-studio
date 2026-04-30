@@ -259,7 +259,7 @@ function startApp() {
   fetchInterval = setInterval(fetchStatus, 3000);
   // Tocar música relaxante em volume baixo
   loadTrack(0);
-  setVolume(5);
+  setVolume(15);
 }
 
 if (enterScreen) {
