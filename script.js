@@ -447,22 +447,10 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // Mostrar texto simples para Roblox
-        imgHtml = '<div class="game-img" style="background:linear-gradient(135deg,#e22316,#ff6b6b);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold;">R</div>';
+        // Para Roblox - texto simples
+        imgHtml = '<div class="game-img">ROBLOX</div>';
       } else {
-        let imgUrl = getImageUrl(act.assets, "large_image", appId);
-        if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
-        // Verificar visuals apenas se for URL HTTPS válida
-        if (!imgUrl && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
-          const visualUrl = kv.visuals.activity_images[appId];
-          if (visualUrl && typeof visualUrl === "string" && visualUrl.startsWith("https://")) {
-            imgUrl = visualUrl;
-          }
-        }
-        // Só usar se for URL HTTPS válida
-        if (imgUrl && typeof imgUrl === "string" && imgUrl.startsWith("https://")) {
-          imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game">';
-        }
+        imgHtml = '';
       }
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
