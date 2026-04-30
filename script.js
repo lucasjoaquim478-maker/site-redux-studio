@@ -16,27 +16,180 @@ let currentMusicVolume = 0.15;
 let currentTrack = 0;
 
 const ambientTracks = [
-  { name: "Ambient Dream", chords: [261.63, 329.63, 392.00, 523.25], tempo: 2000, wave: "sine", detune: 5, filter: 900 },
-  { name: "Chill Wave", chords: [293.66, 349.23, 440.00, 587.33], tempo: 2500, wave: "triangle", detune: 8, filter: 700 },
-  { name: "Night Sky", chords: [329.63, 415.30, 493.88, 659.25], tempo: 3000, wave: "sine", detune: 3, filter: 800 },
-  { name: "Deep Calm", chords: [196.00, 246.94, 293.66, 392.00], tempo: 2200, wave: "sine", detune: 6, filter: 500 },
-  { name: "Starlight", chords: [246.94, 293.66, 369.99, 493.88], tempo: 1800, wave: "triangle", detune: 7, filter: 1000 },
-  { name: "Ocean Breeze", chords: [220.00, 261.63, 329.63, 440.00], tempo: 2800, wave: "sine", detune: 4, filter: 600 },
-  { name: "Moonlit Path", chords: [349.23, 440.00, 523.25, 698.46], tempo: 2400, wave: "sine", detune: 5, filter: 850 },
-  { name: "Crystal Rain", chords: [311.13, 392.00, 466.16, 622.25], tempo: 2100, wave: "triangle", detune: 10, filter: 750 },
-  { name: "Velvet Sunset", chords: [369.99, 466.16, 554.37, 739.99], tempo: 3200, wave: "sine", detune: 3, filter: 550 },
-  { name: "Aurora", chords: [277.18, 329.63, 415.30, 554.37], tempo: 2600, wave: "sine", detune: 6, filter: 950 }
+  {
+    name: "Lofi Dream",
+    bpm: 70,
+    melody: [
+      [523.25, 659.25, 783.99],
+      [493.88, 587.33, 739.99],
+      [440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33]
+    ],
+    bass: [261.63, 246.94, 220.00, 196.00]
+  },
+  {
+    name: "Night Chill",
+    bpm: 65,
+    melody: [
+      [440.00, 523.25, 659.25],
+      [392.00, 493.88, 587.33],
+      [349.23, 440.00, 523.25],
+      [293.66, 349.23, 440.00]
+    ],
+    bass: [220.00, 196.00, 174.61, 146.83]
+  },
+  {
+    name: "Starlight",
+    bpm: 75,
+    melody: [
+      [587.33, 739.99, 880.00],
+      [523.25, 659.25, 783.99],
+      [493.88, 587.33, 739.99],
+      [440.00, 523.25, 659.25]
+    ],
+    bass: [293.66, 261.63, 246.94, 220.00]
+  },
+  {
+    name: "Deep Calm",
+    bpm: 60,
+    melody: [
+      [349.23, 440.00, 523.25],
+      [293.66, 392.00, 440.00],
+      [261.63, 349.23, 392.00],
+      [220.00, 293.66, 349.23]
+    ],
+    bass: [174.61, 146.83, 130.81, 110.00]
+  },
+  {
+    name: "Aurora",
+    bpm: 68,
+    melody: [
+      [493.88, 587.33, 739.99],
+      [440.00, 554.37, 659.25],
+      [392.00, 493.88, 587.33],
+      [329.63, 415.30, 493.88]
+    ],
+    bass: [246.94, 220.00, 196.00, 164.81]
+  }
 ];
 
-const volumeSlider = document.getElementById("volume-slider");
-const trackName = document.getElementById("track-name");
-const prevBtn = document.getElementById("prev-track");
-const nextBtn = document.getElementById("next-track");
+let activeIntervals = [];
 
-function setVolume(val) {
-  currentMusicVolume = val / 100;
-  if (volumeSlider) volumeSlider.value = val;
-  if (musicNodes.master) musicNodes.master.gain.setTargetAtTime(currentMusicVolume, audioCtx.currentTime, 0.1);
+function stopMusic() {
+  musicPlaying = false;
+  activeIntervals.forEach(id => clearInterval(id));
+  activeIntervals = [];
+  if (musicNodes.allOsc) {
+    musicNodes.allOsc.forEach(osc => { try { osc.stop(); } catch(e) {} });
+  }
+  musicNodes.allOsc = [];
+}
+
+function playAmbient(trackIndex) {
+  initAudio();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  stopMusic();
+  musicPlaying = true;
+  if (!musicNodes.allOsc) musicNodes.allOsc = [];
+
+  currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
+  const track = ambientTracks[currentTrack];
+  trackName.textContent = track.name;
+
+  const bpm = track.bpm;
+  const beatTime = 60 / bpm;
+
+  const master = musicNodes.master;
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  const padFilter = audioCtx.createBiquadFilter();
+
+  pad.type = "sine";
+  pad.frequency.value = track.bass[0] / 2;
+  padFilter.type = "lowpass";
+  padFilter.frequency.value = 300;
+  padGain.gain.value = 0.06;
+
+  pad.connect(padFilter);
+  padFilter.connect(padGain);
+  padGain.connect(master);
+  pad.start();
+  musicNodes.allOsc.push(pad);
+
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 0.15;
+  lfoGain.gain.value = 80;
+  lfo.connect(lfoGain);
+  lfoGain.connect(padFilter.frequency);
+  lfo.start();
+  musicNodes.allOsc.push(lfo);
+
+  let chordIdx = 0;
+  let beatInChord = 0;
+
+  function playBeat() {
+    if (!musicPlaying) return;
+
+    const chord = track.melody[chordIdx];
+    const noteFreq = chord[beatInChord % chord.length];
+
+    playNote(noteFreq, beatTime * 0.9, 0.1);
+    playNote(noteFreq * 0.5, beatTime * 1.2, 0.05);
+
+    if (beatInChord === 0) {
+      playNote(track.bass[chordIdx], beatTime * 3, 0.08);
+      pad.frequency.setTargetAtTime(track.bass[chordIdx] / 2, audioCtx.currentTime, 0.5);
+    }
+
+    beatInChord++;
+    if (beatInChord >= 4) {
+      beatInChord = 0;
+      chordIdx = (chordIdx + 1) % track.melody.length;
+    }
+  }
+
+  const interval = setInterval(playBeat, beatTime * 1000);
+  activeIntervals.push(interval);
+  playBeat();
+}
+
+function playNote(freq, duration, vol) {
+  if (!musicPlaying || !audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  osc2.type = "triangle";
+  osc2.frequency.value = freq;
+  osc2.detune.value = 3;
+
+  filter.type = "lowpass";
+  filter.frequency.value = 1200;
+  filter.Q.value = 0.7;
+
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(vol, now + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicNodes.master);
+
+  osc.start(now);
+  osc.stop(now + duration + 0.1);
+  osc2.start(now);
+  osc2.stop(now + duration + 0.1);
+
+  musicNodes.allOsc.push(osc, osc2);
 }
 
 function initAudio() {
