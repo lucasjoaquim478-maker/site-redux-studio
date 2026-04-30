@@ -445,9 +445,8 @@ async function fetchStatus() {
 
       let imgHtml = '';
       if (isRoblox) {
-        // Roblox logo - usar CDN do Discord ou icono
-        let src = "https://cdn.discordapp.com/app-assets/363445589247131668/392351119326367744.png";
-        imgHtml = '<img class="game-img" src="' + src + '" alt="Roblox" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2UyMjMxNiIgZD0iTTE2LDQgMjAsOCAyMCwxNiAxNiwyMCA4LDIwIDQsMTYgNCw4IDgsNCAxNiw0IDE2LDggOCw4IDgsMTYgMTYsMTYiLz48L3N2Zz4=\'">';
+        // Usar SVG inline do Roblox - não tenta cargar imagem externa
+        imgHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
       } else {
         let imgUrl = getImageUrl(act.assets, "large_image", appId);
         if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
