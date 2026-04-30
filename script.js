@@ -12,11 +12,11 @@ const bgMusic = document.getElementById("bg-music");
 bgMusic.volume = 0.15;
 
 const tracks = [
-  { url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3", name: "Lofi Study" },
-  { url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=chill-110771.mp3", name: "Chill Vibes" },
-  { url: "https://cdn.pixabay.com/download/audio/2023/03/31/audio_c320336774.mp3?filename=lofi-beat-153189.mp3", name: "Lofi Beat" },
-  { url: "https://cdn.pixabay.com/download/audio/2022/04/27/audio_5e97580039.mp3?filename=relaxing-mountain-116474.mp3", name: "Mountain Chill" },
-  { url: "https://cdn.pixabay.com/download/audio/2024/08/20/audio_5f1d6f0e53.mp3?filename=ambient-piano-218792.mp3", name: "Ambient Piano" }
+  { url: "https://cdn.pixabay.com/download/audio/2024/06/23/audio_8b04b8bf1d.mp3?filename=chill-beat-228958.mp3", name: "Chill Beat" },
+  { url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_20968c4e95.mp3?filename=lo-fi-chill-186399.mp3", name: "Lo-Fi Chill" },
+  { url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_3a71d65342.mp3?filename=lofi-beat-127728.mp3", name: "Lofi Beat" },
+  { url: "https://cdn.pixabay.com/download/audio/2023/01/16/audio_5587cc3944.mp3?filename=calm-night-144313.mp3", name: "Calm Night" },
+  { url: "https://cdn.pixabay.com/download/audio/2024/03/05/audio_1e0e87b8e8.mp3?filename=dreamy-nights-237412.mp3", name: "Dreamy Nights" }
 ];
 
 let currentTrack = 0;
@@ -33,9 +33,20 @@ function setVolume(val) {
 function loadTrack(index) {
   currentTrack = ((index % tracks.length) + tracks.length) % tracks.length;
   bgMusic.src = tracks[currentTrack].url;
+  trackName.textContent = "Carregando...";
   bgMusic.load();
-  trackName.textContent = tracks[currentTrack].name;
-  bgMusic.play().catch(() => {});
+
+  bgMusic.oncanplay = () => {
+    trackName.textContent = tracks[currentTrack].name;
+    bgMusic.play().catch(() => {
+      trackName.textContent = "Clique para tocar";
+    });
+  };
+
+  bgMusic.onerror = () => {
+    trackName.textContent = "Erro ao carregar";
+    setTimeout(() => loadTrack(currentTrack + 1), 2000);
+  };
 }
 
 volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));

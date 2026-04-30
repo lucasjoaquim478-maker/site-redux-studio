@@ -532,7 +532,7 @@ body {
 
 .music-control {
   position: fixed;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
   width: 200px;
   background: var(--bg-card);
