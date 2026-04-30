@@ -37,6 +37,7 @@ enterScreen.addEventListener("click", () => {
   });
   enterScreen.classList.add("fade-out");
   mainContent.classList.add("show");
+  document.body.style.overflow = "auto";
   setTimeout(() => {
     enterScreen.style.display = "none";
   }, 600);
