@@ -16,29 +16,12 @@ let musicPlaying = false;
 let currentMusicVolume = 0.15;
 let currentTrack = 0;
 let activeIntervals = [];
+let trackAnimFrame = null;
 
 const volumeSlider = document.getElementById("volume-slider");
 const trackName = document.getElementById("track-name");
 const prevBtn = document.getElementById("prev-track");
 const nextBtn = document.getElementById("next-track");
-
-const ambientTracks = [
-  { name: "Ethereal Waves", bpm: 60, wave: "sine",
-    chords: [[523.25,659.25,783.99],[440,554.37,659.25],[392,493.88,587.33],[349.23,440,523.25]],
-    bass: [261.63,220,196,174.61] },
-  { name: "Midnight Study", bpm: 70, wave: "triangle",
-    chords: [[440,523.25,659.25],[392,440,523.25],[349.23,392,440],[293.66,349.23,392]],
-    bass: [220,196,174.61,146.83] },
-  { name: "Cloud Drift", bpm: 55, wave: "sine",
-    chords: [[587.33,739.99,880],[523.25,659.25,783.99],[493.88,587.33,739.99],[440,523.25,659.25]],
-    bass: [293.66,261.63,246.94,220] },
-  { name: "Rainy Window", bpm: 65, wave: "triangle",
-    chords: [[349.23,440,523.25],[293.66,349.23,440],[261.63,329.63,392],[220,261.63,329.63]],
-    bass: [174.61,146.83,130.81,110] },
-  { name: "Neon Pulse", bpm: 75, wave: "sine",
-    chords: [[493.88,587.33,739.99],[440,523.25,659.25],[392,493.88,587.33],[329.63,392,493.88]],
-    bass: [246.94,220,196,164.81] }
-];
 
 function initAudio() {
   if (audioCtx) return;
@@ -58,128 +41,249 @@ function stopMusic() {
   musicPlaying = false;
   activeIntervals.forEach(id => clearInterval(id));
   activeIntervals = [];
+  if (trackAnimFrame) cancelAnimationFrame(trackAnimFrame);
+  trackAnimFrame = null;
   musicNodes.allOsc.forEach(osc => { try { osc.stop(); } catch(e) {} });
   musicNodes.allOsc = [];
 }
 
-function playNote(freq, duration, vol, waveType) {
-  if (!musicPlaying || !audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-
-  osc.type = waveType || "sine";
-  osc.frequency.value = freq;
-  osc2.type = waveType === "triangle" ? "sine" : "triangle";
-  osc2.frequency.value = freq;
-  osc2.detune.value = waveType === "triangle" ? 8 : 4;
-
-  filter.type = "lowpass";
-  filter.frequency.value = waveType === "triangle" ? 800 : 1200;
-  filter.Q.value = 1;
-
-  const now = audioCtx.currentTime;
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(vol, now + 0.03);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-  osc.connect(filter);
-  osc2.connect(filter);
-  filter.connect(gain);
-  gain.connect(musicNodes.master);
-  osc.start(now);
-  osc.stop(now + duration + 0.1);
-  osc2.start(now);
-  osc2.stop(now + duration + 0.1);
-  musicNodes.allOsc.push(osc, osc2);
-}
-
-function playPad(freq, vol) {
-  if (!musicPlaying || !audioCtx) return;
+function makeOsc(freq, type, vol) {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   const filter = audioCtx.createBiquadFilter();
-
-  osc.type = "sine";
+  osc.type = type;
   osc.frequency.value = freq;
   filter.type = "lowpass";
-  filter.frequency.value = 250;
+  filter.frequency.value = 2000;
   gain.gain.value = vol;
-
   osc.connect(filter);
   filter.connect(gain);
   gain.connect(musicNodes.master);
   osc.start();
   musicNodes.allOsc.push(osc);
+  return { osc, gain, filter };
 }
+
+function note(freq, duration, vol, type, attack, release) {
+  if (!musicPlaying || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  const a = attack || 0.05;
+  const r = release || duration;
+  osc.type = type || "sine";
+  osc.frequency.value = freq;
+  osc2.type = type === "square" ? "sawtooth" : "triangle";
+  osc2.frequency.value = freq;
+  osc2.detune.value = 5;
+  filter.type = "lowpass";
+  filter.frequency.value = type === "square" ? 1500 : 1200;
+  filter.Q.value = 0.5;
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(vol, now + a);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  osc.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicNodes.master);
+  osc.start(now);
+  osc.stop(now + duration + 0.2);
+  osc2.start(now);
+  osc2.stop(now + duration + 0.2);
+  musicNodes.allOsc.push(osc, osc2);
+}
+
+// ===== TRACK 1: Ethereal Waves — slow pads, sine, dreamy =====
+function track1() {
+  const chords = [
+    [523.25, 659.25, 783.99],
+    [440, 554.37, 659.25],
+    [392, 493.88, 587.33],
+    [349.23, 440, 523.25]
+  ];
+  const bass = [261.63, 220, 196, 174.61];
+  let idx = 0;
+
+  const pad = audioCtx.createOscillator();
+  const padG = audioCtx.createGain();
+  const padF = audioCtx.createBiquadFilter();
+  pad.type = "sine";
+  pad.frequency.value = bass[0] / 2;
+  padF.type = "lowpass";
+  padF.frequency.value = 400;
+  padG.gain.value = 0.06;
+  pad.connect(padF); padF.connect(padG); padG.connect(musicNodes.master); pad.start();
+  musicNodes.allOsc.push(pad);
+
+  const lfo = audioCtx.createOscillator();
+  const lfoG = audioCtx.createGain();
+  lfo.frequency.value = 0.08;
+  lfoG.gain.value = 150;
+  lfo.connect(lfoG); lfoG.connect(padF.frequency); lfo.start();
+  musicNodes.allOsc.push(lfo);
+
+  activeIntervals.push(setInterval(() => {
+    if (!musicPlaying) return;
+    const ch = chords[idx];
+    ch.forEach(f => note(f * 0.5, 8, 0.04, "sine", 1, 3));
+    note(bass[idx], 6, 0.05, "sine", 0.5, 2);
+    pad.frequency.setTargetAtTime(bass[idx] / 2, audioCtx.currentTime, 1);
+    idx = (idx + 1) % chords.length;
+  }, 6000));
+}
+
+// ===== TRACK 2: Midnight Study — lofi triangle, syncopated =====
+function track2() {
+  const scale = [293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33];
+  let step = 0;
+  const bpm = 72;
+  const bt = 60000 / bpm;
+
+  const pad = makeOsc(146.83, "triangle", 0.04);
+  const lfo = audioCtx.createOscillator();
+  const lfoG = audioCtx.createGain();
+  lfo.frequency.value = 0.3;
+  lfoG.gain.value = 200;
+  lfo.connect(lfoG); lfoG.connect(pad.filter.frequency); lfo.start();
+  musicNodes.allOsc.push(lfo);
+
+  function beat() {
+    if (!musicPlaying) return;
+    const f = scale[step % scale.length];
+    if (step % 4 === 0) note(f, bt * 0.015, 0.1, "triangle", 0.01, 0.01);
+    if (step % 4 === 2) note(f * 1.5, bt * 0.012, 0.07, "triangle", 0.01, 0.01);
+    if (step % 8 === 0) {
+      note(f * 0.25, bt * 0.035, 0.08, "sine", 0.02, 0.02);
+      pad.osc.frequency.setTargetAtTime(f * 0.25, audioCtx.currentTime, 0.3);
+    }
+    if (step % 3 === 0) note(f * 2, bt * 0.006, 0.03, "sine", 0.005, 0.005);
+    step++;
+  }
+  activeIntervals.push(setInterval(beat, bt / 2));
+}
+
+// ===== TRACK 3: Cloud Drift — high arpeggios, shimmering =====
+function track3() {
+  const arps = [
+    [783.99, 987.77, 1174.66, 1318.51],
+    [659.25, 783.99, 987.77, 1174.66],
+    [587.33, 739.99, 880, 987.77],
+    [523.25, 659.25, 783.99, 880]
+  ];
+  const bass = [392, 329.63, 293.66, 261.63];
+  let chordI = 0, noteI = 0;
+
+  const pad = makeOsc(196, "sine", 0.03);
+  pad.filter.frequency.value = 600;
+
+  function arp() {
+    if (!musicPlaying) return;
+    const chord = arps[chordI];
+    const f = chord[noteI % chord.length];
+    note(f, 1.5, 0.06, "sine", 0.3, 1);
+    note(f * 1.002, 1.8, 0.03, "sine", 0.5, 1.2);
+    if (noteI % 4 === 0) {
+      note(bass[chordI] * 0.5, 4, 0.05, "sine", 0.5, 2);
+      pad.osc.frequency.setTargetAtTime(bass[chordI], audioCtx.currentTime, 1);
+    }
+    if (noteI % 8 === 4) {
+      note(chord[Math.floor(Math.random() * chord.length)] * 2, 0.6, 0.04, "sine", 0.1, 0.3);
+    }
+    noteI++;
+    if (noteI % 8 === 0) { chordI = (chordI + 1) % arps.length; }
+  }
+  activeIntervals.push(setInterval(arp, 500));
+}
+
+// ===== TRACK 4: Rainy Window — dark, minor key, sparse, moody =====
+function track4() {
+  const minor = [220, 246.94, 261.63, 293.66, 329.63, 349.23, 392];
+  let phrase = 0;
+
+  const drone = audioCtx.createOscillator();
+  const droneG = audioCtx.createGain();
+  const droneF = audioCtx.createBiquadFilter();
+  drone.type = "sawtooth";
+  drone.frequency.value = 110;
+  droneF.type = "lowpass";
+  droneF.frequency.value = 200;
+  droneF.Q.value = 5;
+  droneG.gain.value = 0.03;
+  drone.connect(droneF); droneF.connect(droneG); droneG.connect(musicNodes.master); drone.start();
+  musicNodes.allOsc.push(drone);
+
+  const droneLfo = audioCtx.createOscillator();
+  const droneLfoG = audioCtx.createGain();
+  droneLfo.frequency.value = 0.05;
+  droneLfoG.gain.value = 100;
+  droneLfo.connect(droneLfoG); droneLfoG.connect(droneF.frequency); droneLfo.start();
+  musicNodes.allOsc.push(droneLfo);
+
+  function rain() {
+    if (!musicPlaying) return;
+    const f = minor[Math.floor(Math.random() * minor.length)];
+    if (phrase % 3 === 0) {
+      note(f, 4, 0.05, "sine", 2, 2);
+      note(f * 1.2, 5, 0.03, "sine", 2.5, 2);
+    }
+    if (phrase % 5 === 0) {
+      note(f * 0.25, 6, 0.06, "triangle", 1, 3);
+      drone.frequency.setTargetAtTime(f * 0.5, audioCtx.currentTime, 2);
+    }
+    if (phrase % 7 === 0) {
+      note(f * 3, 0.3, 0.02, "sine", 0.1, 0.1);
+    }
+    phrase++;
+  }
+  activeIntervals.push(setInterval(rain, 3000));
+}
+
+// ===== TRACK 5: Neon Pulse — synthwave, square, driving =====
+function track5() {
+  const riff = [164.81, 196, 220, 246.94, 220, 196, 164.81, 146.83];
+  const arpUp = [329.63, 415.30, 493.88, 659.25];
+  let step = 0;
+  const bpm = 110;
+  const bt = 60000 / bpm;
+
+  const bass = makeOsc(82.41, "square", 0.06);
+  bass.filter.frequency.value = 500;
+
+  function pulse() {
+    if (!musicPlaying) return;
+    const sf = step % 8;
+    if (sf < 4) {
+      note(riff[sf] * 0.5, bt * 0.022, 0.1, "square", 0.005, 0.005);
+      bass.osc.frequency.setTargetAtTime(riff[sf] * 0.5, audioCtx.currentTime, 0.05);
+    }
+    if (sf % 2 === 0) {
+      note(arpUp[(step >> 1) % arpUp.length], bt * 0.01, 0.06, "square", 0.003, 0.003);
+      note(arpUp[(step >> 1) % arpUp.length] * 2, bt * 0.006, 0.03, "square", 0.002, 0.002);
+    }
+    if (sf === 0 || sf === 4) {
+      note(riff[sf] * 2, bt * 0.018, 0.07, "sawtooth", 0.01, 0.01);
+    }
+    if (sf === 6) {
+      note(arpUp[(step >> 1) % arpUp.length] * 1.5, bt * 0.012, 0.04, "sawtooth", 0.005, 0.005);
+    }
+    step++;
+  }
+  activeIntervals.push(setInterval(pulse, bt / 2));
+}
+
+const trackFunctions = [track1, track2, track3, track4, track5];
+const trackNames = ["Ethereal Waves", "Midnight Study", "Cloud Drift", "Rainy Window", "Neon Pulse"];
 
 function playAmbient(trackIndex) {
   initAudio();
   if (audioCtx.state === "suspended") audioCtx.resume();
   stopMusic();
   musicPlaying = true;
-
-  currentTrack = ((trackIndex % ambientTracks.length) + ambientTracks.length) % ambientTracks.length;
-  const track = ambientTracks[currentTrack];
-  trackName.textContent = track.name;
-
-  const beatTime = 60 / track.bpm;
-  let chordIdx = 0;
-  let beatInChord = 0;
-
-  const pad = audioCtx.createOscillator();
-  const padGain = audioCtx.createGain();
-  const padFilter = audioCtx.createBiquadFilter();
-  pad.type = "sine";
-  pad.frequency.value = track.bass[0] / 2;
-  padFilter.type = "lowpass";
-  padFilter.frequency.value = 300;
-  padGain.gain.value = 0.05;
-  pad.connect(padFilter);
-  padFilter.connect(padGain);
-  padGain.connect(musicNodes.master);
-  pad.start();
-  musicNodes.allOsc.push(pad);
-
-  const lfo = audioCtx.createOscillator();
-  const lfoGain = audioCtx.createGain();
-  lfo.frequency.value = 0.12;
-  lfoGain.gain.value = 100;
-  lfo.connect(lfoGain);
-  lfoGain.connect(padFilter.frequency);
-  lfo.start();
-  musicNodes.allOsc.push(lfo);
-
-  function playBeat() {
-    if (!musicPlaying) return;
-    const chord = track.chords[chordIdx];
-    const note = chord[beatInChord % chord.length];
-    const vol = 0.08;
-
-    playNote(note, beatTime * 0.8, vol, track.wave);
-    playNote(note * 0.5, beatTime * 1.1, 0.04, track.wave);
-
-    if (beatInChord === 0) {
-      playNote(track.bass[chordIdx], beatTime * 3.5, 0.06, "sine");
-      pad.frequency.setTargetAtTime(track.bass[chordIdx] / 2, audioCtx.currentTime, 0.5);
-    }
-
-    if (beatInChord === 2) {
-      const high = chord[Math.floor(Math.random() * chord.length)] * 2;
-      playNote(high, beatTime * 0.4, 0.03, track.wave);
-    }
-
-    beatInChord++;
-    if (beatInChord >= 4) {
-      beatInChord = 0;
-      chordIdx = (chordIdx + 1) % track.chords.length;
-    }
-  }
-
-  const interval = setInterval(playBeat, beatTime * 1000);
-  activeIntervals.push(interval);
-  playBeat();
+  currentTrack = ((trackIndex % trackFunctions.length) + trackFunctions.length) % trackFunctions.length;
+  trackName.textContent = trackNames[currentTrack];
+  trackFunctions[currentTrack]();
 }
 
 function loadTrack(index) { playAmbient(index); }
