@@ -443,18 +443,18 @@ async function fetchStatus() {
         dcTime.textContent = formatDuration(Date.now() - discordStart);
       }
 
-      let imgUrl = getImageUrl(act.assets, "large_image", appId);
-      if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
-      if (!imgUrl && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
-        imgUrl = kv.visuals.activity_images[appId];
-      }
-
       let imgHtml = '';
-      if (imgUrl) {
-        imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game">';
-      }
-      if (isRoblox && !imgUrl) {
+      if (isRoblox) {
         imgHtml = '<div class="game-img roblox-icon"><svg viewBox="0 0 24 24" fill="white"><polygon points="16,4 20,8 20,16 16,20 8,20 4,16 4,8 8,4 16,4 16,8 8,8 8,16 16,16"/></svg></div>';
+      } else {
+        let imgUrl = getImageUrl(act.assets, "large_image", appId);
+        if (!imgUrl) imgUrl = getImageUrl(act.assets, "small_image", appId);
+        if (!imgUrl && kv.visuals && kv.visuals.activity_images && kv.visuals.activity_images[appId]) {
+          imgUrl = kv.visuals.activity_images[appId];
+        }
+        if (imgUrl) {
+          imgHtml = '<img class="game-img" src="' + imgUrl + '" alt="Game">';
+        }
       }
       const timeHtml = discordStart ? formatDuration(Date.now() - discordStart) : "00:00";
 
