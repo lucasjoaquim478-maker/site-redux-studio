@@ -17,11 +17,16 @@ let currentMusicVolume = 0.15;
 let currentTrack = 0;
 
 const ambientTracks = [
-  { name: "Ambient Dream", chords: [261.63, 329.63, 392.00, 493.88], tempo: 2000, wave: "sine" },
-  { name: "Chill Wave", chords: [293.66, 349.23, 440.00, 523.25], tempo: 2500, wave: "triangle" },
-  { name: "Night Sky", chords: [329.63, 415.30, 493.88, 659.25], tempo: 3000, wave: "sine" },
-  { name: "Deep Calm", chords: [196.00, 246.94, 293.66, 392.00], tempo: 2200, wave: "sine" },
-  { name: "Starlight", chords: [246.94, 293.66, 369.99, 493.88], tempo: 1800, wave: "triangle" }
+  { name: "Ambient Dream", chords: [261.63, 329.63, 392.00, 523.25], tempo: 2000, wave: "sine", detune: 5, filter: 900 },
+  { name: "Chill Wave", chords: [293.66, 349.23, 440.00, 587.33], tempo: 2500, wave: "triangle", detune: 8, filter: 700 },
+  { name: "Night Sky", chords: [329.63, 415.30, 493.88, 659.25], tempo: 3000, wave: "sine", detune: 3, filter: 800 },
+  { name: "Deep Calm", chords: [196.00, 246.94, 293.66, 392.00], tempo: 2200, wave: "sine", detune: 6, filter: 500 },
+  { name: "Starlight", chords: [246.94, 293.66, 369.99, 493.88], tempo: 1800, wave: "triangle", detune: 7, filter: 1000 },
+  { name: "Ocean Breeze", chords: [220.00, 261.63, 329.63, 440.00], tempo: 2800, wave: "sine", detune: 4, filter: 600 },
+  { name: "Moonlit Path", chords: [349.23, 440.00, 523.25, 698.46], tempo: 2400, wave: "sine", detune: 5, filter: 850 },
+  { name: "Crystal Rain", chords: [311.13, 392.00, 466.16, 622.25], tempo: 2100, wave: "triangle", detune: 10, filter: 750 },
+  { name: "Velvet Sunset", chords: [369.99, 466.16, 554.37, 739.99], tempo: 3200, wave: "sine", detune: 3, filter: 550 },
+  { name: "Aurora", chords: [277.18, 329.63, 415.30, 554.37], tempo: 2600, wave: "sine", detune: 6, filter: 950 }
 ];
 
 const volumeSlider = document.getElementById("volume-slider");
@@ -65,6 +70,8 @@ function playAmbient(trackIndex) {
   const chords = track.chords;
   const waveType = track.wave;
   const tempo = track.tempo;
+  const detuneVal = track.detune || 5;
+  const filterFreq = track.filter || 800;
 
   musicNodes.chords = [];
 
@@ -78,26 +85,26 @@ function playAmbient(trackIndex) {
 
       osc.type = waveType;
       osc.frequency.value = freq;
-      osc.detune.value = (Math.random() - 0.5) * 10;
+      osc.detune.value = (Math.random() - 0.5) * detuneVal;
 
       filter.type = "lowpass";
-      filter.frequency.value = 800;
-      filter.Q.value = 1;
+      filter.frequency.value = filterFreq;
+      filter.Q.value = 0.5;
 
       const now = audioCtx.currentTime;
       const noteLen = tempo / 1000;
-      const startOffset = i * (tempo / 1000) * 0.3;
+      const startOffset = i * (tempo / 1000) * 0.25;
 
       gain.gain.setValueAtTime(0, now + startOffset);
-      gain.gain.linearRampToValueAtTime(0.15, now + startOffset + noteLen * 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + startOffset + noteLen * 1.5);
+      gain.gain.linearRampToValueAtTime(0.12, now + startOffset + noteLen * 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + startOffset + noteLen * 1.8);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(musicNodes.master);
 
       osc.start(now + startOffset);
-      osc.stop(now + startOffset + noteLen * 1.5);
+      osc.stop(now + startOffset + noteLen * 1.8);
       musicNodes.chords.push(osc);
     });
 
@@ -116,9 +123,9 @@ function playAmbient(trackIndex) {
   pad.frequency.value = chords[0] / 2;
 
   padFilter.type = "lowpass";
-  padFilter.frequency.value = 400;
+  padFilter.frequency.value = filterFreq * 0.5;
 
-  padGain.gain.value = 0.05;
+  padGain.gain.value = 0.04;
 
   pad.connect(padFilter);
   padFilter.connect(padGain);
@@ -128,8 +135,8 @@ function playAmbient(trackIndex) {
 
   const lfo = audioCtx.createOscillator();
   const lfoGain = audioCtx.createGain();
-  lfo.frequency.value = 0.3;
-  lfoGain.gain.value = 100;
+  lfo.frequency.value = 0.2;
+  lfoGain.gain.value = filterFreq * 0.3;
   lfo.connect(lfoGain);
   lfoGain.connect(padFilter.frequency);
   lfo.start();
