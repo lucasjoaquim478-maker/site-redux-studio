@@ -1,6 +1,6 @@
 const userId = "1109957738387230740";
 
-// YouTube Player
+// YouTube Player - apenas áudio
 var ytPlayer;
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('youtube-player', {
@@ -13,7 +13,9 @@ function onYouTubeIframeAPIReady() {
       'loop': 1,
       'playlist': '3HjG1Y4QpVA',
       'iv_load_policy': 3,
-      'volume': 15
+      'volume': 15,
+      'width': 1,
+      'height': 1
     },
     events: {
       'onReady': function(event) {
