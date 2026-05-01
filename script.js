@@ -25,6 +25,7 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
+  let spotifyServerFetchTime = 0, spotifyDeviceFetchTime = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -54,16 +55,11 @@
     }
   };
 
-  function updateProgress() {
-    if (!spotifyData) return;
-  }
-
   function updateTimers() {
     if (dom.sessionTime) dom.sessionTime.textContent = utils.brt();
     if (discordStart && hasActivity && dom.dcTime) {
       dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
     }
-    updateProgress();
   }
 
   async function fetchStatus() {
@@ -128,8 +124,6 @@
         currentSpotify = null;
         spotifyData = null;
         clearInterval(spotifyTimerInterval);
-        spotifyServerFetchTime = 0;
-        spotifyDeviceFetchTime = 0;
         dom.spotifyBox.innerHTML = "";
       }
 
