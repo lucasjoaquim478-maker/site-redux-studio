@@ -119,14 +119,15 @@
             </div>`;
         }
 
+        const serverStart = serverNow;
         spotifyTimerInterval = setInterval(() => {
-          spotifyElapsed += 1000;
-          if (spotifyElapsed > spotifyTotalMs) spotifyElapsed = spotifyTotalMs;
-          const pctNow = spotifyTotalMs > 0 ? (spotifyElapsed / spotifyTotalMs * 100) : 0;
+          const now = Date.now();
+          const elapsed = Math.max(0, Math.min(now - serverStart + spotifyElapsed, spotifyTotalMs));
+          const pctNow = spotifyTotalMs > 0 ? (elapsed / spotifyTotalMs * 100) : 0;
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
           if (progressBar) progressBar.style.width = pctNow.toFixed(2) + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(spotifyElapsed) + " / " + utils.formatDuration(spotifyTotalMs);
+          if (timesEl) timesEl.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(spotifyTotalMs);
         }, 1000);
       } else {
         currentSpotify = null;
