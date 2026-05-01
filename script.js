@@ -168,11 +168,24 @@ async function fetchStatus() {
   }
 }
 
+let pendingSpotifyUrl = "";
+
 function confirmSpotify(url) {
   if (!url) return;
-  if (confirm("Abrir музыка no Spotify?")) {
-    window.open(url, "_blank");
+  pendingSpotifyUrl = url;
+  document.getElementById("popup-overlay").style.display = "flex";
+}
+
+function closePopup() {
+  document.getElementById("popup-overlay").style.display = "none";
+  pendingSpotifyUrl = "";
+}
+
+function confirmSpotifyAction() {
+  if (pendingSpotifyUrl) {
+    window.open(pendingSpotifyUrl, "_blank");
   }
+  closePopup();
 }
 
 function escapeHtml(str) {
