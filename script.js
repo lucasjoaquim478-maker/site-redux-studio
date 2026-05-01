@@ -114,11 +114,13 @@
         function updateSpotifyTimer() {
           const now = Date.now();
           const elapsed = now - start;
-          const pct = total > 0 ? Math.min(100, (elapsed / total) * 100) : 0;
+          const totalSec = Math.floor(total / 1000);
+          const currentSec = Math.floor(Math.min(elapsed, total) / 1000);
+          const pct = totalSec > 0 ? Math.min(100, (currentSec / totalSec) * 100) : 0;
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
           if (progressBar) progressBar.style.width = pct + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(Math.min(elapsed, total)) + " / " + utils.formatDuration(total);
+          if (timesEl) timesEl.textContent = utils.formatDuration(currentSec * 1000) + " / " + utils.formatDuration(total);
         }
         
         updateSpotifyTimer();
