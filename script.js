@@ -25,7 +25,9 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
-  let serverOffset = 0;
+  let spotifyAbsoluteStart = 0;
+  let spotifyTotalMs = 0;
+  let perfStart = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -65,10 +67,6 @@
   async function fetchStatus() {
     try {
       const res = await fetch("https://api.lanyard.rest/v1/users/" + userId);
-      const serverDate = res.headers.get("date");
-      if (serverDate) {
-        serverOffset = new Date(serverDate).getTime() - Date.now();
-      }
       const data = await res.json();
       if (!data?.success) return;
 
@@ -104,8 +102,12 @@
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
         
-        const totalMs = total;
-        let elapsedMs = Math.max(0, Date.now() - start);
+        spotifyAbsoluteStart = start;
+        spotifyTotalMs = total;
+        perfStart = performance.now();
+        
+        const initialElapsed = Date.now() - start;
+        const pct = Math.min(100, (initialElapsed / total) * 100);
         
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
@@ -113,19 +115,18 @@
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">${utils.formatDuration(elapsedMs)} / ${utils.formatDuration(totalMs)}</div>
-              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${(Math.min(elapsedMs, totalMs) / totalMs * 100).toFixed(2)}%"></div></div>
+              <div class="spotify-times" id="spotify-times">${utils.formatDuration(Math.min(initialElapsed, total))} / ${utils.formatDuration(total)}</div>
+              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${pct.toFixed(2)}%"></div></div>
             </div>
           </div>`;
         
         spotifyTimerInterval = setInterval(() => {
-          elapsedMs += 1000;
-          const currentMs = Math.min(elapsedMs, totalMs);
-          const pct = (currentMs / totalMs * 100).toFixed(2);
+          const elapsedMs = Math.min(perfStart + (performance.now() - perfStart), spotifyTotalMs);
+          const currentPct = (elapsedMs / spotifyTotalMs * 100).toFixed(2);
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
-          if (progressBar) progressBar.style.width = pct + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(currentMs) + " / " + utils.formatDuration(totalMs);
+          if (progressBar) progressBar.style.width = currentPct + "%";
+          if (timesEl) timesEl.textContent = utils.formatDuration(elapsedMs) + " / " + utils.formatDuration(spotifyTotalMs);
         }, 1000);
       } else {
         currentSpotify = null;
