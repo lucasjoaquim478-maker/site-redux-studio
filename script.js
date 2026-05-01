@@ -25,9 +25,7 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
-  let spotifyBaseTime = 0;
-  let spotifyBasePerf = 0;
-  let spotifyStart = 0;
+  let spotifyElapsed = 0;
   let spotifyTotalMs = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
@@ -104,32 +102,31 @@
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
-        
-        spotifyBaseTime = start;
+
         spotifyTotalMs = totalMs;
-        spotifyBasePerf = performance.now();
-        
-        const elapsedAtFetch = Math.max(0, Math.min(serverNow - start, totalMs));
-        let pct = totalMs > 0 ? (elapsedAtFetch / totalMs * 100) : 0;
-        
-        dom.spotifyBox.innerHTML =
-          `<div class="spotify" data-url="${spotifyUrl}">
-            <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
-            <div class="spotify-info">
-              <div class="title">${song}</div>
-              <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">${utils.formatDuration(elapsedAtFetch)} / ${utils.formatDuration(totalMs)}</div>
-              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${pct.toFixed(2)}%"></div></div>
-            </div>
-          </div>`;
-        
+        spotifyElapsed = Math.min(Math.max(0, serverNow - start), totalMs);
+
+        if (dom.spotifyBox) {
+          dom.spotifyBox.innerHTML =
+            `<div class="spotify" data-url="${spotifyUrl}">
+              <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
+              <div class="spotify-info">
+                <div class="title">${song}</div>
+                <div class="artist">${artist}</div>
+                <div class="spotify-times" id="spotify-times">${utils.formatDuration(spotifyElapsed)} / ${utils.formatDuration(totalMs)}</div>
+                <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${(spotifyElapsed / totalMs * 100).toFixed(2)}%"></div></div>
+              </div>
+            </div>`;
+        }
+
         spotifyTimerInterval = setInterval(() => {
-          const elapsedMs = Math.min(spotifyBaseTime + (performance.now() - spotifyBasePerf), spotifyBaseTime + spotifyTotalMs) - spotifyBaseTime;
-          const pctNow = spotifyTotalMs > 0 ? (elapsedMs / spotifyTotalMs * 100) : 0;
+          spotifyElapsed += 1000;
+          if (spotifyElapsed > spotifyTotalMs) spotifyElapsed = spotifyTotalMs;
+          const pctNow = spotifyTotalMs > 0 ? (spotifyElapsed / spotifyTotalMs * 100) : 0;
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
           if (progressBar) progressBar.style.width = pctNow.toFixed(2) + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(elapsedMs) + " / " + utils.formatDuration(spotifyTotalMs);
+          if (timesEl) timesEl.textContent = utils.formatDuration(spotifyElapsed) + " / " + utils.formatDuration(spotifyTotalMs);
         }, 1000);
       } else {
         currentSpotify = null;
@@ -149,7 +146,7 @@
             discordStart = act.timestamps.start;
             currentGameStart = act.timestamps.start;
           }
-          dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
+          if (dom.dcTime) dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
         }
 
         let imgHtml = isRoblox
