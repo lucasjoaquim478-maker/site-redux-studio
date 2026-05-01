@@ -103,13 +103,15 @@ async function fetchStatus() {
       const total = spotify.timestamps.end - spotify.timestamps.start;
       const pct = total > 0 ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
       const spotifyUrl = spotify.track_id ? 'https://open.spotify.com/track/' + spotify.track_id : '';
+      const songName = spotify.song || '';
+      const artistName = spotify.artist || '';
 
       spotifyBox.innerHTML =
-        '<div class="spotify" onclick="confirmSpotify(\'' + spotifyUrl + '\')">' +
+        '<div class="spotify" data-url="' + spotifyUrl + '">' +
           '<img src="' + spotify.album_art_url + '" alt="Album" onerror="this.style.display=\'none\'">' +
           '<div class="spotify-info">' +
-            '<div class="title">' + escapeHtml(spotify.song) + '</div>' +
-            '<div class="artist">' + escapeHtml(spotify.artist) + '</div>' +
+            '<div class="title">' + escapeHtml(songName) + '</div>' +
+            '<div class="artist">' + escapeHtml(artistName) + '</div>' +
             '<div class="spotify-times" id="spotify-times">' + formatDuration(elapsed) + " / " + formatDuration(total) + '</div>' +
             '<div class="progress"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
           '</div>' +
@@ -188,6 +190,25 @@ function confirmSpotifyAction() {
   closePopup();
 }
 
+// Click outside popup to close
+document.addEventListener("click", function(e) {
+  const popup = document.getElementById("popup-overlay");
+  if (popup && e.target === popup) {
+    closePopup();
+  }
+});
+
+// ESC to close popup
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    closePopup();
+  }
+});
+
+window.confirmSpotify = confirmSpotify;
+window.closePopup = closePopup;
+window.confirmSpotifyAction = confirmSpotifyAction;
+
 function escapeHtml(str) {
   if (!str) return "";
   const div = document.createElement("div");
@@ -201,6 +222,17 @@ const mainContent = document.getElementById("main-content");
 let hasEntered = false;
 let timerInterval = null;
 let fetchInterval = null;
+
+// Spotify click handler
+spotifyBox.addEventListener("click", function(e) {
+  const spotifyEl = e.target.closest(".spotify");
+  if (spotifyEl) {
+    const url = spotifyEl.getAttribute("data-url");
+    if (url) {
+      confirmSpotify(url);
+    }
+  }
+});
 
 function startApp() {
   updateTimers();
