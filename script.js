@@ -25,7 +25,7 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
-  let spotifyServerFetchTime = 0, spotifyDeviceFetchTime = 0;
+  let serverOffset = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -65,6 +65,10 @@
   async function fetchStatus() {
     try {
       const res = await fetch("https://api.lanyard.rest/v1/users/" + userId);
+      const serverDate = res.headers.get("date");
+      if (serverDate) {
+        serverOffset = new Date(serverDate).getTime() - Date.now();
+      }
       const data = await res.json();
       if (!data?.success) return;
 
