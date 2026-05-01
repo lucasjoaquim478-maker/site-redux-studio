@@ -25,9 +25,10 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
-  let spotifyAbsoluteStart = 0;
-  let spotifyTotalMs = 0;
-  let perfStart = 0;
+  let serverNow = Date.now();
+  let spotifyStart = 0;
+  let spotifyTotalMs =0;
+  let spotifyPerfStart = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
