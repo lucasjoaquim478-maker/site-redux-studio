@@ -24,6 +24,8 @@
 
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
+  let lastProgressUpdate = 0;
+  let elapsedAtFetch = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -54,12 +56,16 @@
   };
 
   function updateProgress() {
-    if (!spotifyData) return;
-    const start = spotifyData.timestamps.start;
-    const total = spotifyData.timestamps.end - start;
+    if (!spotifyData || elapsedAtFetch <= 0) return;
+    const total = spotifyData.timestamps.end - spotifyData.timestamps.start;
     if (total <= 0) return;
+    const timeSinceLastUpdate = Date.now() - lastProgressUpdate;
+    const currentElapsed = elapsedAtFetch + timeSinceLastUpdate;
+    const pct = Math.min(100, Math.max(0, (currentElapsed / total) * 100));
     const bar = dom.spotifyBox.querySelector(".progress-bar");
-    if (bar) bar.style.width = "100%";
+    const times = dom.spotifyBox.querySelector(".spotify-times");
+    if (bar) bar.style.width = pct + "%";
+    if (times) times.textContent = utils.formatDuration(currentElapsed) + " / " + utils.formatDuration(total);
   }
 
   function updateTimers() {
@@ -97,11 +103,13 @@
       if (spotify?.album_art_url) {
         currentSpotify = spotify;
         spotifyData = spotify;
+        const timeAtFetch = Date.now();
         const start = spotify.timestamps.start;
+        elapsedAtFetch = timeAtFetch - start;
+        lastProgressUpdate = timeAtFetch;
         const end = spotify.timestamps.end;
         const total = end - start;
-        const elapsedAtFetch = 0;
-        const pct = Math.min(100, Math.max(0, (elapsedAtFetch / total) * 100));
+        const pct = total > 0 ? Math.min(100, Math.max(0, (elapsedAtFetch / total) * 100)) : 0;
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
@@ -119,7 +127,8 @@
       } else {
         currentSpotify = null;
         spotifyData = null;
-        spotifyFetchTime = 0;
+        elapsedAtFetch = 0;
+        lastProgressUpdate = 0;
         dom.spotifyBox.innerHTML = "";
       }
 
