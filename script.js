@@ -54,12 +54,15 @@
 
   function updateProgress() {
     if (!currentSpotify) return;
-    const elapsed = Date.now() - currentSpotify.timestamps.start;
-    const total = currentSpotify.timestamps.end - currentSpotify.timestamps.start;
+    const now = Date.now();
+    const start = currentSpotify.timestamps.start;
+    const end = currentSpotify.timestamps.end;
+    const elapsed = now - start;
+    const total = end - start;
     if (total <= 0) return;
     const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
     const bar = dom.spotifyBox.querySelector(".progress-bar");
-    const times = document.getElementById("spotify-times");
+    const times = dom.spotifyBox.querySelector(".spotify-times");
     if (bar) bar.style.width = pct + "%";
     if (times) times.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
   }
@@ -105,13 +108,13 @@
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
 
-        dom.spotifyBox.innerHTML = `
-          <div class="spotify" data-url="${spotifyUrl}">
+        dom.spotifyBox.innerHTML =
+          `<div class="spotify" data-url="${spotifyUrl}">
             <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">${utils.formatDuration(start)} / ${utils.formatDuration(total)}</div>
+              <div class="spotify-times">${utils.formatDuration(start)} / ${utils.formatDuration(total)}</div>
               <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
             </div>
           </div>`;
