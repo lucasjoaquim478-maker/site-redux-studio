@@ -104,31 +104,29 @@
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
         
+        const totalMs = total;
+        let elapsedMs = Math.max(0, Date.now() - start);
+        
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
             <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">00:00 / ${utils.formatDuration(total)}</div>
-              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:0%"></div></div>
+              <div class="spotify-times" id="spotify-times">${utils.formatDuration(elapsedMs)} / ${utils.formatDuration(totalMs)}</div>
+              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${(Math.min(elapsedMs, totalMs) / totalMs * 100).toFixed(2)}%"></div></div>
             </div>
           </div>`;
         
-        function updateSpotifyTimer() {
-          const now = Date.now();
-          const elapsed = now - start;
-          const totalSec = Math.floor(total / 1000);
-          const currentSec = Math.floor(Math.min(elapsed, total) / 1000);
-          const pct = totalSec > 0 ? Math.min(100, (currentSec / totalSec) * 100) : 0;
+        spotifyTimerInterval = setInterval(() => {
+          elapsedMs += 1000;
+          const currentMs = Math.min(elapsedMs, totalMs);
+          const pct = (currentMs / totalMs * 100).toFixed(2);
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
           if (progressBar) progressBar.style.width = pct + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(currentSec * 1000) + " / " + utils.formatDuration(total);
-        }
-        
-        updateSpotifyTimer();
-        spotifyTimerInterval = setInterval(updateSpotifyTimer, 1000);
+          if (timesEl) timesEl.textContent = utils.formatDuration(currentMs) + " / " + utils.formatDuration(totalMs);
+        }, 1000);
       } else {
         currentSpotify = null;
         spotifyData = null;
