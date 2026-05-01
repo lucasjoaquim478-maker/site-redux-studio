@@ -100,7 +100,6 @@
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
-        const trackId = "spotify-track-" + Date.now();
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
             <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
@@ -111,13 +110,18 @@
               <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:0%"></div></div>
             </div>
           </div>`;
-        spotifyTimerInterval = setInterval(() => {
-          const elapsed = Date.now() - start;
-          const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+        const apiFetchTime = Date.now();
+        const apiSongPos = (apiFetchTime - start);
+        spotifyTimerInterval = setInterval(function() {
+          const nowSeconds = Math.floor((Date.now() - apiFetchTime) / 1000);
+          const startSeconds = Math.floor(apiSongPos / 1000);
+          const totalSeconds = Math.floor(total / 1000);
+          const currentSeconds = startSeconds + nowSeconds;
+          const pct = totalSeconds > 0 ? Math.min(100, Math.max(0, (currentSeconds / totalSeconds) * 100)) : 0;
           const progressBar = document.getElementById("spotify-progress");
           const timesEl = document.getElementById("spotify-times");
           if (progressBar) progressBar.style.width = pct + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
+          if (timesEl) timesEl.textContent = currentSeconds + "s / " + totalSeconds + "s";
         }, 1000);
       } else {
         currentSpotify = null;
