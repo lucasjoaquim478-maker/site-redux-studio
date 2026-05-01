@@ -24,8 +24,7 @@
 
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
-  let lastProgressUpdate = 0;
-  let elapsedAtFetch = 0;
+  let spotifyTimerInterval = null;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -56,16 +55,7 @@
   };
 
   function updateProgress() {
-    if (!spotifyData || elapsedAtFetch <= 0) return;
-    const total = spotifyData.timestamps.end - spotifyData.timestamps.start;
-    if (total <= 0) return;
-    const timeSinceLastUpdate = Date.now() - lastProgressUpdate;
-    const currentElapsed = elapsedAtFetch + timeSinceLastUpdate;
-    const pct = Math.min(100, Math.max(0, (currentElapsed / total) * 100));
-    const bar = dom.spotifyBox.querySelector(".progress-bar");
-    const times = dom.spotifyBox.querySelector(".spotify-times");
-    if (bar) bar.style.width = pct + "%";
-    if (times) times.textContent = utils.formatDuration(currentElapsed) + " / " + utils.formatDuration(total);
+    if (!spotifyData) return;
   }
 
   function updateTimers() {
@@ -103,32 +93,36 @@
       if (spotify?.album_art_url) {
         currentSpotify = spotify;
         spotifyData = spotify;
-        const timeAtFetch = Date.now();
-        const start = spotify.timestamps.start;
-        elapsedAtFetch = timeAtFetch - start;
-        lastProgressUpdate = timeAtFetch;
         const end = spotify.timestamps.end;
+        const start = spotify.timestamps.start;
         const total = end - start;
-        const pct = total > 0 ? Math.min(100, Math.max(0, (elapsedAtFetch / total) * 100)) : 0;
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
-
+        clearInterval(spotifyTimerInterval);
+        const trackId = "spotify-track-" + Date.now();
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
             <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times">${utils.formatDuration(elapsedAtFetch)} / ${utils.formatDuration(total)}</div>
-              <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+              <div class="spotify-times" id="spotify-times">--:-- / ${utils.formatDuration(total)}</div>
+              <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:0%"></div></div>
             </div>
           </div>`;
+        spotifyTimerInterval = setInterval(() => {
+          const elapsed = Date.now() - start;
+          const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+          const progressBar = document.getElementById("spotify-progress");
+          const timesEl = document.getElementById("spotify-times");
+          if (progressBar) progressBar.style.width = pct + "%";
+          if (timesEl) timesEl.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
+        }, 1000);
       } else {
         currentSpotify = null;
         spotifyData = null;
-        elapsedAtFetch = 0;
-        lastProgressUpdate = 0;
+        clearInterval(spotifyTimerInterval);
         dom.spotifyBox.innerHTML = "";
       }
 
