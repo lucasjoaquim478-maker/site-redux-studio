@@ -1094,3 +1094,90 @@ body {
 .popup-btn:active {
   transform: scale(0.98);
 }
+
+/* ========== NOTIFICATIONS ========== */
+.notification {
+  position: fixed;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.95), rgba(0, 204, 153, 0.95));
+  color: #0a0a0f;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 255, 204, 0.4);
+  z-index: 3000;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.notification-show {
+  bottom: 30px;
+  opacity: 1;
+}
+
+.notification-error {
+  background: linear-gradient(135deg, rgba(242, 63, 67, 0.95), rgba(200, 50, 50, 0.95));
+  box-shadow: 0 8px 32px rgba(242, 63, 67, 0.4);
+}
+
+/* ========== LOADING ANIMATION ========== */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 10, 15, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ========== TEXT GLOW EFFECT ========== */
+.text-glow {
+  text-shadow: 0 0 10px var(--primary-glow), 0 0 20px var(--primary-glow);
+}
+
+/* ========== FADE IN ANIMATION ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card > * {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.card > *:nth-child(1) { animation-delay: 0.1s; }
+.card > *:nth-child(2) { animation-delay: 0.2s; }
+.card > *:nth-child(3) { animation-delay: 0.3s; }
+.card > *:nth-child(4) { animation-delay: 0.4s; }
+.card > *:nth-child(5) { animation-delay: 0.5s; }

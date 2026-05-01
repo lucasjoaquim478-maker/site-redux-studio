@@ -80,7 +80,10 @@
           dom.avatar.src = `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
         }
       }
-      if (dom.username) dom.username.textContent = user.username;
+      if (dom.username) {
+        dom.username.textContent = user.username;
+        dom.username.classList.add("text-glow");
+      }
       if (dom.statusEl) dom.statusEl.className = "status-" + status;
 
       const filteredActs = activities?.filter(a => a.type !== 4 && a.type !== 2) || [];
