@@ -97,18 +97,15 @@
         spotifyData = spotify;
         const start = spotify.timestamps.start;
         const end = spotify.timestamps.end;
-        const total = end - start;
+        const totalMs = end - start;
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
         
-        spotifyAbsoluteStart = start;
-        spotifyTotalMs = total;
-        perfStart = performance.now();
-        
-        const initialElapsed = Date.now() - start;
-        const pct = Math.min(100, (initialElapsed / total) * 100);
+        const elapsedAtFetch = Math.max(0, Math.min(Date.now() - start, totalMs));
+        let currentMs = elapsedAtFetch;
+        let pct = totalMs > 0 ? (currentMs / totalMs * 100) : 0;
         
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
@@ -116,18 +113,19 @@
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">${utils.formatDuration(Math.min(initialElapsed, total))} / ${utils.formatDuration(total)}</div>
+              <div class="spotify-times" id="spotify-times">${utils.formatDuration(currentMs)} / ${utils.formatDuration(totalMs)}</div>
               <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:${pct.toFixed(2)}%"></div></div>
             </div>
           </div>`;
         
         spotifyTimerInterval = setInterval(() => {
-          const elapsedMs = Math.min(perfStart + (performance.now() - perfStart), spotifyTotalMs);
-          const currentPct = (elapsedMs / spotifyTotalMs * 100).toFixed(2);
+          currentMs += 1000;
+          if (currentMs > totalMs) currentMs = totalMs;
+          const pctNow = totalMs > 0 ? (currentMs / totalMs * 100) : 0;
           const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
           const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
-          if (progressBar) progressBar.style.width = currentPct + "%";
-          if (timesEl) timesEl.textContent = utils.formatDuration(elapsedMs) + " / " + utils.formatDuration(spotifyTotalMs);
+          if (progressBar) progressBar.style.width = pctNow.toFixed(2) + "%";
+          if (timesEl) timesEl.textContent = utils.formatDuration(currentMs) + " / " + utils.formatDuration(totalMs);
         }, 1000);
       } else {
         currentSpotify = null;
