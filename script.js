@@ -58,11 +58,11 @@
     const start = spotifyData.timestamps.start;
     const total = spotifyData.timestamps.end - start;
     if (total <= 0) return;
-    const elapsed = spotifyFetchTime - start + (Date.now() - spotifyFetchTime);
-    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const elapsed = Math.min(total, spotifyFetchTime - start + (Date.now() - spotifyFetchTime));
+    const pct = (elapsed / total) * 100;
     const bar = dom.spotifyBox.querySelector(".progress-bar");
     const times = dom.spotifyBox.querySelector(".spotify-times");
-    if (bar) bar.style.width = pct + "%";
+    if (bar) bar.style.width = Math.min(100, pct) + "%";
     if (times) times.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
   }
 
