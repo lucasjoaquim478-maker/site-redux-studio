@@ -25,6 +25,8 @@
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
   let spotifyData = null;
   let spotifyTimerInterval = null;
+  let spotifyServerFetchTime = 0;
+  let spotifyDeviceFetchTime = 0;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -70,6 +72,16 @@
     try {
       const res = await fetch("https://api.lanyard.rest/v1/users/" + userId);
       const data = await res.json();
+      
+      // Captura o tempo UTC do servidor Lanyard via cabeçalho Date
+      let serverTime = 0;
+      const serverDateStr = res.headers.get('Date');
+      if (serverDateStr) {
+        const parsed = new Date(serverDateStr);
+        if (!isNaN(parsed.getTime())) serverTime = parsed.getTime();
+      }
+      const deviceFetchTime = Date.now();
+      
       if (!data?.success) return;
 
       const { discord_user: user, discord_status: status, activities, spotify } = data.data;
@@ -93,40 +105,47 @@
       if (spotify?.album_art_url) {
         currentSpotify = spotify;
         spotifyData = spotify;
-        const end = spotify.timestamps.end;
         const start = spotify.timestamps.start;
+        const end = spotify.timestamps.end;
         const total = end - start;
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
         clearInterval(spotifyTimerInterval);
+        
+        // Salva referências de tempo do servidor
+        const elapsedAtFetch = serverTime - start;
+        spotifyServerFetchTime = serverTime;
+        spotifyDeviceFetchTime = deviceFetchTime;
+        
         dom.spotifyBox.innerHTML =
           `<div class="spotify" data-url="${spotifyUrl}">
             <img src="${spotify.album_art_url}" alt="Album" onerror="this.style.display='none'">
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times" id="spotify-times">--:-- / ${utils.formatDuration(total)}</div>
+              <div class="spotify-times" id="spotify-times">${utils.formatDuration(elapsedAtFetch)} / ${utils.formatDuration(total)}</div>
               <div class="progress"><div class="progress-bar" id="spotify-progress" style="width:0%"></div></div>
             </div>
           </div>`;
-        const apiFetchTime = Date.now();
-        const apiSongPos = (apiFetchTime - start);
         spotifyTimerInterval = setInterval(function() {
-          const nowSeconds = Math.floor((Date.now() - apiFetchTime) / 1000);
-          const startSeconds = Math.floor(apiSongPos / 1000);
-          const totalSeconds = Math.floor(total / 1000);
-          const currentSeconds = startSeconds + nowSeconds;
-          const pct = totalSeconds > 0 ? Math.min(100, Math.max(0, (currentSeconds / totalSeconds) * 100)) : 0;
+          // Calcula tempo atual baseado no servidor + incremento do dispositivo
+          const nowDevice = Date.now();
+          const deviceDelta = nowDevice - spotifyDeviceFetchTime;
+          const currentServerTime = spotifyServerFetchTime + deviceDelta;
+          const elapsed = currentServerTime - start;
+          const pct = total > 0 ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
           const progressBar = document.getElementById("spotify-progress");
           const timesEl = document.getElementById("spotify-times");
           if (progressBar) progressBar.style.width = pct + "%";
-          if (timesEl) timesEl.textContent = currentSeconds + "s / " + totalSeconds + "s";
+          if (timesEl) timesEl.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
         }, 1000);
       } else {
         currentSpotify = null;
         spotifyData = null;
         clearInterval(spotifyTimerInterval);
+        spotifyServerFetchTime = 0;
+        spotifyDeviceFetchTime = 0;
         dom.spotifyBox.innerHTML = "";
       }
 
