@@ -102,9 +102,10 @@ async function fetchStatus() {
       const elapsed = Date.now() - spotify.timestamps.start;
       const total = spotify.timestamps.end - spotify.timestamps.start;
       const pct = total > 0 ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
+      const spotifyUrl = spotify.track_id ? 'https://open.spotify.com/track/' + spotify.track_id : '';
 
       spotifyBox.innerHTML =
-        '<div class="spotify">' +
+        '<a href="' + spotifyUrl + '" target="_blank" rel="noopener noreferrer" class="spotify">' +
           '<img src="' + spotify.album_art_url + '" alt="Album" onerror="this.style.display=\'none\'">' +
           '<div class="spotify-info">' +
             '<div class="title">' + escapeHtml(spotify.song) + '</div>' +
@@ -112,7 +113,7 @@ async function fetchStatus() {
             '<div class="spotify-times" id="spotify-times">' + formatDuration(elapsed) + " / " + formatDuration(total) + '</div>' +
             '<div class="progress"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
           '</div>' +
-        '</div>';
+        '</a>';
     } else {
       currentSpotify = null;
       spotifyBox.innerHTML = "";
