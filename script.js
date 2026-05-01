@@ -23,7 +23,7 @@
   };
 
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
-  let spotifyFetchTime = 0, spotifyTrackStart = 0, spotifyElapsedAtFetch = 0;
+  let spotifyData = null;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -54,16 +54,17 @@
   };
 
   function updateProgress() {
-    if (!currentSpotify || spotifyElapsedAtFetch <= 0) return;
-    const trackEnd = currentSpotify.timestamps.end;
-    const totalDuration = trackEnd - spotifyTrackStart;
-    if (totalDuration <= 0) return;
-    const elapsed = spotifyElapsedAtFetch + (Date.now() - spotifyFetchTime);
-    const pct = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+    if (!spotifyData) return;
+    const start = spotifyData.timestamps.start;
+    const end = spotifyData.timestamps.end;
+    const total = end - start;
+    if (total <= 0) return;
+    const elapsed = Date.now() - start;
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
     const bar = dom.spotifyBox.querySelector(".progress-bar");
     const times = dom.spotifyBox.querySelector(".spotify-times");
     if (bar) bar.style.width = pct + "%";
-    if (times) times.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(totalDuration);
+    if (times) times.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
   }
 
   function updateTimers() {
@@ -100,12 +101,11 @@
 
       if (spotify?.album_art_url) {
         currentSpotify = spotify;
-        spotifyFetchTime = Date.now();
-        spotifyTrackStart = spotify.timestamps.start;
-        spotifyElapsedAtFetch = spotifyFetchTime - spotifyTrackStart;
-        const trackEnd = spotify.timestamps.end;
-        const totalDuration = trackEnd - spotifyTrackStart;
-        const pct = totalDuration > 0 ? Math.min(100, Math.max(0, (spotifyElapsedAtFetch / totalDuration) * 100)) : 0;
+        spotifyData = spotify;
+        const start = spotify.timestamps.start;
+        const end = spotify.timestamps.end;
+        const total = end - start;
+        const pct = total > 0 ? Math.min(100, Math.max(0, ((Date.now() - start) / total) * 100)) : 0;
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
         const artist = utils.escapeHtml(spotify.artist);
@@ -116,15 +116,13 @@
             <div class="spotify-info">
               <div class="title">${song}</div>
               <div class="artist">${artist}</div>
-              <div class="spotify-times">${utils.formatDuration(spotifyElapsedAtFetch)} / ${utils.formatDuration(totalDuration)}</div>
+              <div class="spotify-times">${utils.formatDuration(Date.now() - start)} / ${utils.formatDuration(total)}</div>
               <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
             </div>
           </div>`;
       } else {
         currentSpotify = null;
-        spotifyElapsedAtFetch = 0;
-        spotifyFetchTime = 0;
-        spotifyTrackStart = 0;
+        spotifyData = null;
         dom.spotifyBox.innerHTML = "";
       }
 
