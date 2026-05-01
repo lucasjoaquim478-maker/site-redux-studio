@@ -23,7 +23,7 @@
   };
 
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
-  let spotifyData = null; let spotifyFetchTime = 0;
+  let spotifyData = null;
   let pendingSpotifyUrl = "";
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
@@ -54,16 +54,12 @@
   };
 
   function updateProgress() {
-    if (!spotifyData || spotifyFetchTime === 0) return;
+    if (!spotifyData) return;
     const start = spotifyData.timestamps.start;
     const total = spotifyData.timestamps.end - start;
     if (total <= 0) return;
-    const elapsed = Math.min(total, spotifyFetchTime - start + (Date.now() - spotifyFetchTime));
-    const pct = (elapsed / total) * 100;
     const bar = dom.spotifyBox.querySelector(".progress-bar");
-    const times = dom.spotifyBox.querySelector(".spotify-times");
-    if (bar) bar.style.width = Math.min(100, pct) + "%";
-    if (times) times.textContent = utils.formatDuration(elapsed) + " / " + utils.formatDuration(total);
+    if (bar) bar.style.width = "100%";
   }
 
   function updateTimers() {
@@ -101,11 +97,10 @@
       if (spotify?.album_art_url) {
         currentSpotify = spotify;
         spotifyData = spotify;
-        spotifyFetchTime = Date.now();
         const start = spotify.timestamps.start;
         const end = spotify.timestamps.end;
         const total = end - start;
-        const elapsedAtFetch = spotifyFetchTime - start;
+        const elapsedAtFetch = 0;
         const pct = Math.min(100, Math.max(0, (elapsedAtFetch / total) * 100));
         const spotifyUrl = spotify.track_id ? `https://open.spotify.com/track/${spotify.track_id}` : "";
         const song = utils.escapeHtml(spotify.song);
