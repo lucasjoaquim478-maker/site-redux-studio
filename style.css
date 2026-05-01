@@ -454,10 +454,6 @@ body {
   border-radius: 10px;
 }
 
-.dc:hover {
-  transform: scale(1.01);
-}
-
 .dc-info {
   text-align: left;
   flex: 1;

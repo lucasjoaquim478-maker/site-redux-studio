@@ -112,8 +112,8 @@
           const now = Date.now();
           const elapsed = now - start;
           const pct = total > 0 ? Math.min(100, (elapsed / total) * 100) : 0;
-          const progressBar = document.getElementById("spotify-progress");
-          const timesEl = document.getElementById("spotify-times");
+          const progressBar = dom.spotifyBox?.querySelector("#spotify-progress");
+          const timesEl = dom.spotifyBox?.querySelector("#spotify-times");
           if (progressBar) progressBar.style.width = pct + "%";
           if (timesEl) timesEl.textContent = utils.formatDuration(Math.min(elapsed, total)) + " / " + utils.formatDuration(total);
         }
@@ -124,7 +124,7 @@
         currentSpotify = null;
         spotifyData = null;
         clearInterval(spotifyTimerInterval);
-        dom.spotifyBox.innerHTML = "";
+        if (dom.spotifyBox) dom.spotifyBox.innerHTML = "";
       }
 
       if (filteredActs.length > 0) {
@@ -148,20 +148,22 @@
               return url ? `<img class="game-img" src="${url}" alt="Game" onerror="this.style.display='none'">` : "";
             })();
 
-        dom.discordBox.innerHTML = `
-          <div class="dc${isRoblox ? " roblox-card" : ""}">
-            ${imgHtml}
-            <div class="dc-info">
-              <div class="game-name">${utils.escapeHtml(act.name)}</div>
-              <div class="dc-time">${discordStart ? utils.formatDuration(Date.now() - discordStart) : "00:00"}</div>
-            </div>
-          </div>`;
+        if (dom.discordBox) {
+          dom.discordBox.innerHTML = `
+            <div class="dc${isRoblox ? " roblox-card" : ""}">
+              ${imgHtml}
+              <div class="dc-info">
+                <div class="game-name">${utils.escapeHtml(act.name)}</div>
+                <div class="dc-time">${discordStart ? utils.formatDuration(Date.now() - discordStart) : "00:00"}</div>
+              </div>
+            </div>`;
+        }
       } else {
         if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
         discordStart = null;
         currentGameStart = null;
-        dom.dcTime.textContent = "--:--";
-        dom.discordBox.innerHTML = "";
+        if (dom.dcTime) dom.dcTime.textContent = "--:--";
+        if (dom.discordBox) dom.discordBox.innerHTML = "";
       }
     } catch (err) {
       console.error("Lanyard error:", err);
@@ -195,10 +197,12 @@
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closePopup(); });
 
-  dom.spotifyBox.addEventListener("click", e => {
-    const spotifyEl = e.target.closest(".spotify");
-    if (spotifyEl) confirmSpotify(spotifyEl.getAttribute("data-url"));
-  });
+  if (dom.spotifyBox) {
+    dom.spotifyBox.addEventListener("click", e => {
+      const spotifyEl = e.target.closest(".spotify");
+      if (spotifyEl) confirmSpotify(spotifyEl.getAttribute("data-url"));
+    });
+  }
 
   if (dom.copyBtn) {
     dom.copyBtn.addEventListener("click", () => {
