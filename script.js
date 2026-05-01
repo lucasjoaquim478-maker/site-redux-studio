@@ -105,7 +105,7 @@ async function fetchStatus() {
       const spotifyUrl = spotify.track_id ? 'https://open.spotify.com/track/' + spotify.track_id : '';
 
       spotifyBox.innerHTML =
-        '<a href="' + spotifyUrl + '" target="_blank" rel="noopener noreferrer" class="spotify">' +
+        '<div class="spotify" onclick="confirmSpotify(\'' + spotifyUrl + '\')">' +
           '<img src="' + spotify.album_art_url + '" alt="Album" onerror="this.style.display=\'none\'">' +
           '<div class="spotify-info">' +
             '<div class="title">' + escapeHtml(spotify.song) + '</div>' +
@@ -113,7 +113,7 @@ async function fetchStatus() {
             '<div class="spotify-times" id="spotify-times">' + formatDuration(elapsed) + " / " + formatDuration(total) + '</div>' +
             '<div class="progress"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
           '</div>' +
-        '</a>';
+        '</div>';
     } else {
       currentSpotify = null;
       spotifyBox.innerHTML = "";
@@ -165,6 +165,13 @@ async function fetchStatus() {
   } catch (err) {
     console.error("Lanyard error:", err);
     if (activityStatus) activityStatus.textContent = "Error";
+  }
+}
+
+function confirmSpotify(url) {
+  if (!url) return;
+  if (confirm("Abrir музыка no Spotify?")) {
+    window.open(url, "_blank");
   }
 }
 
