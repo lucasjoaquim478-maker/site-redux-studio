@@ -23,8 +23,7 @@
     enterHintText: document.getElementById("enter-hint-text"),
     bgMusic: document.getElementById("bg-music"),
     particlesCanvas: document.getElementById("particles"),
-    musicControl: document.getElementById("music-control"),
-    terminalBody: document.getElementById("terminal-body")
+    musicControl: document.getElementById("music-control")
   };
   
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
@@ -91,8 +90,6 @@
     }
   };
   
-  const logHistory = [];
-  const MAX_LOGS = 20;
   const LOG_BIN_ID = "69f554f0856a68218997c5b4";
   const LOG_API_KEY = "$2a$10$qZ1MvIeqjEQ6RHYS2TZzDOZtrKsMoxlqShPKJiqokbiCnMS3p3V46";
   
@@ -117,48 +114,6 @@
     } catch (err) {
       console.error("Failed to send log:", err);
     }
-  }
-  
-  async function addLog(message, type = "info") {
-    const time = new Date().toISOString();
-    const entry = { time, message, type };
-    
-    sendLogToApi(entry);
-    
-    logHistory.push(entry);
-    if (logHistory.length > MAX_LOGS) logHistory.shift();
-    
-    if (dom.terminalBody && document.getElementById("terminal").style.display !== "none") {
-      renderLogs();
-    }
-  }
-  
-  function renderLogs() {
-    if (!dom.terminalBody) return;
-    dom.terminalBody.innerHTML = logHistory.map(l => 
-      "<div class=\"terminal-line\"><span class=\"terminal-time\">[" + l.time + "]</span><span class=\"terminal-user\">" + l.message + "</span></div>"
-    ).join("");
-    dom.terminalBody.scrollTop = dom.terminalBody.scrollHeight;
-  }
-  
-  function toggleTerminal() {
-    const term = document.getElementById("terminal");
-    if (term.style.display === "none") {
-      term.style.display = "block";
-      renderLogs();
-    } else {
-      term.style.display = "none";
-    }
-  }
-  
-  window.toggleTerminal = toggleTerminal;
-  
-  function addTerminalTrigger() {
-    const btn = document.createElement("button");
-    btn.className = "terminal-trigger";
-    btn.textContent = ">";
-    btn.onclick = toggleTerminal;
-    document.body.appendChild(btn);
   }
   
   function updateTimers() {
@@ -480,16 +435,12 @@
       const deviceType = isMobile ? "Mobile" : "Desktop";
       const deviceBrowser = userAgent.indexOf("Firefox") > -1 ? "Firefox" : userAgent.indexOf("Chrome") > -1 ? "Chrome" : "Other";
       
-      addLog("Nova visita: " + deviceType + " (" + deviceBrowser + ")", "visit");
+      const time = new Date().toISOString();
+      sendLogToApi({ time, message: "Nova visita: " + deviceType + " (" + deviceBrowser + ")", type: "visit" });
       
       dom.enterScreen.classList.add("fade-out");
       dom.mainContent.classList.add("show");
       document.body.style.overflow = "auto";
-      
-      if (isDev) {
-        addTerminalTrigger();
-        document.getElementById("terminal").style.display = "block";
-      }
       
       setTimeout(function() {
         dom.enterScreen.style.display = "none";
