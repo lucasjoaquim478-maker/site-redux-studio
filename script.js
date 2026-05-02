@@ -23,7 +23,8 @@
     enterHintText: document.getElementById("enter-hint-text"),
     bgMusic: document.getElementById("bg-music"),
     particlesCanvas: document.getElementById("particles"),
-    musicControl: document.getElementById("music-control")
+    musicControl: document.getElementById("music-control"),
+    terminalBody: document.getElementById("terminal-body")
   };
   
   let discordStart = null, currentGameStart = null, currentSpotify = null, hasActivity = false;
@@ -89,6 +90,48 @@
       }, 3000);
     }
   };
+  
+  const logHistory = [];
+  const MAX_LOGS = 20;
+  
+  function addLog(message, type = "info") {
+    const time = new Date().toLocaleTimeString("pt-BR", { hour12: false });
+    const entry = { time, message, type };
+    logHistory.push(entry);
+    if (logHistory.length > MAX_LOGS) logHistory.shift();
+    
+    if (dom.terminalBody && document.getElementById("terminal").style.display !== "none") {
+      renderLogs();
+    }
+  }
+  
+  function renderLogs() {
+    if (!dom.terminalBody) return;
+    dom.terminalBody.innerHTML = logHistory.map(l => 
+      "<div class=\"terminal-line\"><span class=\"terminal-time\">[" + l.time + "]</span><span class=\"terminal-user\">" + l.message + "</span></div>"
+    ).join("");
+    dom.terminalBody.scrollTop = dom.terminalBody.scrollHeight;
+  }
+  
+  function toggleTerminal() {
+    const term = document.getElementById("terminal");
+    if (term.style.display === "none") {
+      term.style.display = "block";
+      renderLogs();
+    } else {
+      term.style.display = "none";
+    }
+  }
+  
+  window.toggleTerminal = toggleTerminal;
+  
+  function addTerminalTrigger() {
+    const btn = document.createElement("button");
+    btn.className = "terminal-trigger";
+    btn.textContent = ">";
+    btn.onclick = toggleTerminal;
+    document.body.appendChild(btn);
+  }
   
   function updateTimers() {
     if (dom.sessionTime) dom.sessionTime.textContent = utils.brt();
@@ -404,9 +447,21 @@
       if (hasEntered) return;
       hasEntered = true;
       
+      const userAgent = navigator.userAgent;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const deviceType = isMobile ? "Mobile" : "Desktop";
+      const deviceBrowser = userAgent.indexOf("Firefox") > -1 ? "Firefox" : userAgent.indexOf("Chrome") > -1 ? "Chrome" : "Other";
+      
+      addLog("Nova visita: " + deviceType + " (" + deviceBrowser + ")", "visit");
+      
       dom.enterScreen.classList.add("fade-out");
       dom.mainContent.classList.add("show");
       document.body.style.overflow = "auto";
+      
+      if (isDev) {
+        addTerminalTrigger();
+        document.getElementById("terminal").style.display = "block";
+      }
       
       setTimeout(function() {
         dom.enterScreen.style.display = "none";
