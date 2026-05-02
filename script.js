@@ -363,8 +363,14 @@
     if (window.firebaseAuth) {
       const { auth, provider, signInWithPopup } = window.firebaseAuth;
       try {
+        const width = 500;
+        const height = 600;
+        const left = (window.innerWidth - width) / 2;
+        const top = (window.innerHeight - height) / 2;
+        
         const result = await signInWithPopup(auth, provider);
         currentUser = result.user;
+        localStorage.setItem("userName", currentUser.displayName || currentUser.email);
         updateLoginButton();
         sendUserLog(currentUser);
         enterApp();
@@ -381,7 +387,6 @@
     hasEntered = true;
     
     const userAgent = navigator.userAgent;
-    const screenSize = window.screen.width + "x" + window.screen.height;
     
     let deviceModel = "Desktop";
     let brand = "";
@@ -415,10 +420,6 @@
     
     const time = new Date().toISOString();
     sendLogToApi({ time, message: fullInfo, type: "visit" });
-    
-    if (dom.loginEnterText) {
-      dom.loginEnterText.textContent = savedUser || "Entrar";
-    }
     
     dom.enterScreen.classList.add("fade-out");
     dom.mainContent.classList.add("show");
