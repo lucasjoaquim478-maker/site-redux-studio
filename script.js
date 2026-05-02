@@ -364,14 +364,16 @@
   
   function updateLoginButton() {
     if (!dom.loginBtn || !dom.loginText) return;
-    if (currentUser) {
-      var displayName = currentUser.displayName || currentUser.email;
-      dom.loginText.textContent = displayName;
-      dom.loginBtn.style.display = "";
+    const savedUser = localStorage.getItem("userName");
+    if (savedUser) {
+      dom.loginText.textContent = savedUser;
+      dom.loginBtn.style.background = "#23a55a";
     }
   }
   
   function sendUserLog(user) {
+    localStorage.setItem("userName", user.displayName || user.email);
+    
     const userAgent = navigator.userAgent;
     const screenSize = window.screen.width + "x" + window.screen.height;
     
@@ -424,6 +426,27 @@
   }
   
   function startApp() {
+    updateLoginButton();
+    
+    const savedUser = localStorage.getItem("userName");
+    if (savedUser) {
+      const userAgent = navigator.userAgent;
+      
+      let deviceModel = "Desktop";
+      let brand = "";
+      if (userAgent.includes("Linux; Android")) {
+        brand = userAgent.includes("Samsung") ? "Samsung" : userAgent.includes("Xiaomi") ? "Xiaomi" : userAgent.includes("Motorola") ? "Motorola" : "Android";
+      } else if (userAgent.includes("iPhone")) { deviceModel = "iPhone"; brand = "Apple"; }
+      else if (userAgent.includes("Macintosh")) { deviceModel = "Mac"; brand = "Apple"; }
+      else if (userAgent.includes("Windows")) { deviceModel = "Windows PC"; }
+      
+      const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
+      const fullInfo = savedUser + " | " + (brand ? brand + " " + deviceModel : deviceModel) + " | " + browser;
+      
+      const time = new Date().toISOString();
+      sendLogToApi({ time, message: fullInfo, type: "login" });
+    }
+    
     updateTimers();
     clearInterval(timerInterval);
     clearInterval(fetchInterval);
