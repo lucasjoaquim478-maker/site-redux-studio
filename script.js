@@ -159,7 +159,6 @@
   
   async function fetchStatus() {
     try {
-      console.log("Fetching status from Lanyard...");
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
       
@@ -174,7 +173,6 @@
       }
       
       const data = await res.json();
-      console.log("Lanyard response:", data);
       
       if (!data || !data.success) {
         retryCount++;
@@ -457,8 +455,6 @@
   }
   
   function startApp() {
-    updateLoginButton();
-    
     const savedUser = localStorage.getItem("userName");
     if (savedUser) {
       const userAgent = navigator.userAgent;
