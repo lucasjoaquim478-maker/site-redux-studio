@@ -428,22 +428,26 @@
       hasEntered = true;
       
       const userAgent = navigator.userAgent;
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
       
-      let deviceModel = "Unknown";
+      let deviceModel = "Desktop";
       if (userAgent.includes("Linux; Android")) {
-        const match = userAgent.match(/Android [^;]+;/);
-        if (match) deviceModel = match[0].replace(";", "").trim();
+        const match = userAgent.match(/Linux; Android ([^;]+)/);
+        if (match) deviceModel = match[1].trim();
+      } else if (userAgent.includes("iPhone")) {
+        deviceModel = "iPhone";
+      } else if (userAgent.includes("iPad")) {
+        deviceModel = "iPad";
       } else if (userAgent.includes("Macintosh")) {
         deviceModel = "Mac";
-      } else if (userAgent.includes("Windows NT 10.0")) {
+      } else if (userAgent.includes("Windows")) {
         deviceModel = "Windows PC";
-      } else if (isMobile) {
+      } else if (userAgent.includes("Mobile")) {
         deviceModel = "Mobile";
       }
       
       const time = new Date().toISOString();
-      sendLogToApi({ time, message: "Nova visita", device: deviceModel, type: "visit" });
+      const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
+      sendLogToApi({ time, message: deviceModel + " - " + browser, type: "visit" });
       
       dom.enterScreen.classList.add("fade-out");
       dom.mainContent.classList.add("show");
