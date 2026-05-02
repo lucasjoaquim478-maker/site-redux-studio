@@ -1247,3 +1247,38 @@ body {
   border-radius: 10px;
   font-size: 1.2rem;
 }
+
+/* ========== WELCOME CARD ========== */
+.welcome-card {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(10, 10, 15, 0.95);
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  z-index: 9999;
+  animation: welcomeIn 0.5s ease;
+}
+
+@keyframes welcomeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.welcome-icon {
+  font-size: 1.2rem;
+}
+
+#welcome-text {
+  color: var(--primary);
+  font-weight: 600;
+}

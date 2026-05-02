@@ -21,6 +21,8 @@
     loginText: document.getElementById("login-text"),
     loginEnterBtn: document.getElementById("login-enter"),
     loginEnterText: document.getElementById("login-enter-text"),
+    welcomeCard: document.getElementById("welcome-card"),
+    welcomeText: document.getElementById("welcome-text"),
     enterScreen: document.getElementById("enter-screen"),
     mainContent: document.getElementById("main-content"),
     enterTitle: document.getElementById("enter-title"),
@@ -347,91 +349,10 @@
     });
   }
   
-  if (dom.loginBtn) {
-    dom.loginBtn.addEventListener("click", async function() {
-      doLogin();
-    });
-  }
-  
-  if (dom.loginEnterBtn) {
-    dom.loginEnterBtn.addEventListener("click", async function() {
-      doLogin();
-    });
-  }
-  
-  async function doLogin() {
-    if (window.firebaseAuth) {
-      const { auth, provider, signInWithPopup } = window.firebaseAuth;
-      try {
-        const width = 500;
-        const height = 600;
-        const left = (window.innerWidth - width) / 2;
-        const top = (window.innerHeight - height) / 2;
-        
-        const result = await signInWithPopup(auth, provider);
-        currentUser = result.user;
-        localStorage.setItem("userName", currentUser.displayName || currentUser.email);
-        updateLoginButton();
-        sendUserLog(currentUser);
-        enterApp();
-      } catch (err) {
-        console.error("Login error:", err);
-        enterApp();
-      }
-    } else {
-      enterApp();
-    }
-  }
-  
-  function enterApp() {
-    hasEntered = true;
-    
-    const userAgent = navigator.userAgent;
-    
-    let deviceModel = "Desktop";
-    let brand = "";
-    
-    if (userAgent.includes("Linux; Android")) {
-      const match = userAgent.match(/Linux; Android ([^;]+)/);
-      if (match) deviceModel = match[1].trim();
-      if (userAgent.includes("Samsung")) brand = "Samsung";
-      else if (userAgent.includes("Xiaomi")) brand = "Xiaomi";
-      else if (userAgent.includes("Motorola")) brand = "Motorola";
-      else if (userAgent.includes("Pixel")) brand = "Pixel";
-    } else if (userAgent.includes("iPhone")) {
-      const match = userAgent.match(/iPhone OS (\d+)/);
-      deviceModel = match ? "iPhone " + match[1] : "iPhone";
-      brand = "Apple";
-    } else if (userAgent.includes("iPad")) {
-      deviceModel = "iPad";
-      brand = "Apple";
-    } else if (userAgent.includes("Macintosh")) {
-      deviceModel = "Mac";
-      brand = "Apple";
-    } else if (userAgent.includes("Windows")) {
-      deviceModel = "Windows PC";
-    }
-    
-    const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
+  updateLoginButton();
     
     const savedUser = localStorage.getItem("userName");
-    const userName = savedUser || "Visitante";
-    const fullInfo = userName + " | " + (brand ? brand + " " + deviceModel : deviceModel) + " | " + browser;
-    
-    const time = new Date().toISOString();
-    sendLogToApi({ time, message: fullInfo, type: "visit" });
-    
-    dom.enterScreen.classList.add("fade-out");
-    dom.mainContent.classList.add("show");
-    document.body.style.overflow = "auto";
-    setTimeout(function() {
-      dom.enterScreen.style.display = "none";
-    }, 600);
-    startApp();
-    initParticles();
-  }
-  
-  function updateLoginButton() {
+    if (savedUser) {
     if (!dom.loginBtn || !dom.loginText) return;
     const savedUser = localStorage.getItem("userName");
     if (savedUser) {
