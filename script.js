@@ -349,23 +349,10 @@
     });
   }
   
-  updateLoginButton();
-    
-    const savedUser = localStorage.getItem("userName");
-    if (savedUser) {
-    if (!dom.loginBtn || !dom.loginText) return;
-    const savedUser = localStorage.getItem("userName");
-    if (savedUser) {
-      dom.loginText.textContent = savedUser;
-      dom.loginBtn.style.background = "#23a55a";
-    }
-  }
-  
   function sendUserLog(user) {
     localStorage.setItem("userName", user.displayName || user.email);
     
     const userAgent = navigator.userAgent;
-    const screenSize = window.screen.width + "x" + window.screen.height;
     
     let deviceModel = "Desktop";
     let brand = "";
@@ -397,6 +384,62 @@
     
     const time = new Date().toISOString();
     sendLogToApi({ time, message: fullInfo, type: "login" });
+  }
+  
+  function enterApp() {
+    hasEntered = true;
+    
+    const userAgent = navigator.userAgent;
+    
+    let deviceModel = "Desktop";
+    let brand = "";
+    
+    if (userAgent.includes("Linux; Android")) {
+      const match = userAgent.match(/Linux; Android ([^;]+)/);
+      if (match) deviceModel = match[1].trim();
+      if (userAgent.includes("Samsung")) brand = "Samsung";
+      else if (userAgent.includes("Xiaomi")) brand = "Xiaomi";
+      else if (userAgent.includes("Motorola")) brand = "Motorola";
+      else if (userAgent.includes("Pixel")) brand = "Pixel";
+    } else if (userAgent.includes("iPhone")) {
+      const match = userAgent.match(/iPhone OS (\d+)/);
+      deviceModel = match ? "iPhone " + match[1] : "iPhone";
+      brand = "Apple";
+    } else if (userAgent.includes("iPad")) {
+      deviceModel = "iPad";
+      brand = "Apple";
+    } else if (userAgent.includes("Macintosh")) {
+      deviceModel = "Mac";
+      brand = "Apple";
+    } else if (userAgent.includes("Windows")) {
+      deviceModel = "Windows PC";
+    }
+    
+    const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
+    
+    const savedUser = localStorage.getItem("userName");
+    const userName = savedUser || "Visitante";
+    const fullInfo = userName + " | " + (brand ? brand + " " + deviceModel : deviceModel) + " | " + browser;
+    
+    const time = new Date().toISOString();
+    sendLogToApi({ time, message: fullInfo, type: "visit" });
+    
+    if (dom.welcomeCard && dom.welcomeText) {
+      dom.welcomeText.textContent = "Bem-vindo, " + userName + "!";
+      dom.welcomeCard.style.display = "block";
+      setTimeout(function() {
+        if (dom.welcomeCard) dom.welcomeCard.style.display = "none";
+      }, 5000);
+    }
+    
+    dom.enterScreen.classList.add("fade-out");
+    dom.mainContent.classList.add("show");
+    document.body.style.overflow = "auto";
+    setTimeout(function() {
+      if (dom.enterScreen) dom.enterScreen.style.display = "none";
+    }, 600);
+    startApp();
+    initParticles();
   }
   
   function toggleMusic() {
