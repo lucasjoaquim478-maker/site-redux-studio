@@ -36,6 +36,7 @@
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
   let isPlaying = false;
+  const isDev = userId === userId;
   
   const utils = {
     formatDuration(ms) {
@@ -97,6 +98,8 @@
   }
   
   async function fetchVisitors() {
+    if (!isDev) return;
+    
     try {
       const res = await fetch("https://api.lanyard.rest/v1/users/" + userId);
       const data = await res.json();
@@ -108,7 +111,7 @@
       const onlineCount = activeCounts ? (activeCounts.desktop || 0) + (activeCounts.mobile || 0) + (activeCounts.web || 0) : 0;
       
       if (dom.visitorCount) {
-        dom.visitorCount.textContent = onlineCount > 0 ? onlineCount : "0";
+        dom.visitorCount.textContent = isDev ? (onlineCount > 0 ? onlineCount : "0") : "";
       }
       
       const activities = d.activities || [];
@@ -338,7 +341,10 @@
     clearInterval(fetchInterval);
     timerInterval = setInterval(updateTimers, 1000);
     fetchStatus();
-    fetchVisitors();
+    if (isDev) {
+      fetchVisitors();
+      document.querySelectorAll('.dev-only').forEach(el => el.style.display = '');
+    }
     fetchInterval = setInterval(fetchStatus, FETCH_INTERVAL);
   }
   
