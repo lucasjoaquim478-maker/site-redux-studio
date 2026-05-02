@@ -93,10 +93,38 @@
   
   const logHistory = [];
   const MAX_LOGS = 20;
+  const LOG_BIN_ID = "685f2b89acd3cb34a7e1f2a0";
+  const LOG_API_KEY = "$2a$10$xSRf28BXKU1Uj0fSPSE5FOZIpvx8l0COn5RnuDOeKr3IdrF8uVh0i";
   
-  function addLog(message, type = "info") {
-    const time = new Date().toLocaleTimeString("pt-BR", { hour12: false });
+  async function sendLogToApi(logEntry) {
+    try {
+      const currentRes = await fetch(`https://api.jsonbin.io/v3/b/${LOG_BIN_ID}/latest`, {
+        headers: { "X-Access-Key": LOG_API_KEY }
+      });
+      const currentData = await currentRes.json();
+      const logs = currentData.record?.logs || [];
+      logs.unshift(logEntry);
+      const trimmedLogs = logs.slice(0, 100);
+      
+      await fetch(`https://api.jsonbin.io/v3/b/${LOG_BIN_ID}`, {
+        method: "PUT",
+        headers: {
+          "X-Access-Key": LOG_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ logs: trimmedLogs })
+      });
+    } catch (err) {
+      console.error("Failed to send log:", err);
+    }
+  }
+  
+  async function addLog(message, type = "info") {
+    const time = new Date().toISOString();
     const entry = { time, message, type };
+    
+    sendLogToApi(entry);
+    
     logHistory.push(entry);
     if (logHistory.length > MAX_LOGS) logHistory.shift();
     

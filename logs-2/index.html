@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEV LOGS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e4e4e7; font-family: 'JetBrains Mono', monospace; min-height: 100vh; padding: 20px; }
+    .logs-container { max-width: 600px; margin: 0 auto; }
+    .logs-header { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); border-radius: 12px; margin-bottom: 16px; }
+    .logs-header h1 { font-size: 1rem; color: #00ffcc; flex: 1; }
+    .status { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .status.offline { background: #80848e; }
+    .status.online { background: #23a55a; }
+    .status.error { background: #f23f43; }
+    .logs-header button { background: #00ffcc; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .logs-body { background: rgba(10, 10, 15, 0.9); border: 1px solid rgba(0, 255, 204, 0.15); border-radius: 12px; padding: 12px; max-height: 70vh; overflow-y: auto; }
+    .log-line { padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.75rem; display: flex; gap: 12px; }
+    .log-line:last-child { border-bottom: none; }
+    .log-time { color: #00ffcc; }
+    .log-msg { flex: 1; color: #8b9eff; }
+    .log-device { color: #71717a; font-size: 0.65rem; }
+    .log-line.visit { border-left: 3px solid #23a55a; }
+    .log-line.exit { border-left: 3px solid #f23f43; }
+    .log-line.error { color: #f23f43; }
+    .log-line.empty, .log-line.loading { color: #71717a; text-align: center; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="logs-container">
+    <div class="logs-header">
+      <h1>DEV LOGS</h1>
+      <span id="status" class="status offline">Offline</span>
+      <button onclick="fetchLogs()">↻ Atualizar</button>
+    </div>
+    <div id="logs-body" class="logs-body">
+      <div class="log-line loading">Carregando...</div>
+    </div>
+  </div>
+  <script>
+    const BIN_ID = "685f2b89acd3cb34a7e1f2a0";
+    const API_KEY = "$2a$10$xSRf28BXKU1Uj0fSPSE5FOZIpvx8l0COn5RnuDOeKr3IdrF8uVh0i";
+    
+    async function fetchLogs() {
+      try {
+        document.getElementById("status").className = "status offline";
+        document.getElementById("status").textContent = "Carregando...";
+        
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Access-Key": API_KEY }
+        });
+        
+        if (!res.ok) throw new Error("API error");
+        
+        const data = await res.json();
+        const logs = data.record?.logs || [];
+        
+        if (logs.length === 0) {
+          document.getElementById("logs-body").innerHTML = '<div class="log-line empty">Nenhuma visita ainda</div>';
+          return;
+        }
+        
+        document.getElementById("logs-body").innerHTML = logs.slice(0, 50).map(log => {
+          const time = new Date(log.time).toLocaleString("pt-BR");
+          return `<div class="log-line ${log.type}">
+            <span class="log-time">[${time}]</span>
+            <span class="log-msg">${log.message}</span>
+            <span class="log-device">${log.device}</span>
+          </div>`;
+        }).join("");
+        
+        document.getElementById("status").className = "status online";
+        document.getElementById("status").textContent = "Online";
+      } catch (err) {
+        document.getElementById("status").className = "status error";
+        document.getElementById("status").textContent = "Erro";
+        document.getElementById("logs-body").innerHTML = `<div class="log-line error">Erro: ${err.message}</div>`;
+      }
+    }
+    
+    function refreshLogs() {
+      fetchLogs();
+    }
+    
+    fetchLogs();
+    setInterval(fetchLogs, 5000);
+  </script>
+</body>
+</html>
