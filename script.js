@@ -17,6 +17,8 @@
     friendsBox: document.getElementById("friends-box"),
     activityStatus: document.getElementById("activity-status"),
     copyBtn: document.getElementById("copy"),
+    loginBtn: document.getElementById("login-google"),
+    loginText: document.getElementById("login-text"),
     enterScreen: document.getElementById("enter-screen"),
     mainContent: document.getElementById("main-content"),
     enterTitle: document.getElementById("enter-title"),
@@ -36,6 +38,7 @@
   let timerInterval = null, fetchInterval = null;
   let hasEntered = false;
   let isPlaying = false;
+  let currentUser = null;
   const isDev = userId === userId;
   
   const utils = {
@@ -340,6 +343,68 @@
         utils.showNotification("Failed to copy", true);
       });
     });
+  }
+  
+  if (dom.loginBtn) {
+    dom.loginBtn.addEventListener("click", async function() {
+      if (window.firebaseAuth) {
+        const { auth, provider, signInWithPopup } = window.firebaseAuth;
+        try {
+          const result = await signInWithPopup(auth, provider);
+          currentUser = result.user;
+          updateLoginButton();
+          sendUserLog(currentUser);
+        } catch (err) {
+          console.error("Login error:", err);
+          utils.showNotification("Erro ao fazer login", true);
+        }
+      }
+    });
+  }
+  
+  function updateLoginButton() {
+    if (!dom.loginBtn || !dom.loginText) return;
+    if (currentUser) {
+      var displayName = currentUser.displayName || currentUser.email;
+      dom.loginText.textContent = displayName;
+      dom.loginBtn.style.display = "";
+    }
+  }
+  
+  function sendUserLog(user) {
+    const userAgent = navigator.userAgent;
+    const screenSize = window.screen.width + "x" + window.screen.height;
+    
+    let deviceModel = "Desktop";
+    let brand = "";
+    
+    if (userAgent.includes("Linux; Android")) {
+      const match = userAgent.match(/Linux; Android ([^;]+)/);
+      if (match) deviceModel = match[1].trim();
+      if (userAgent.includes("Samsung")) brand = "Samsung";
+      else if (userAgent.includes("Xiaomi")) brand = "Xiaomi";
+      else if (userAgent.includes("Motorola")) brand = "Motorola";
+      else if (userAgent.includes("Pixel")) brand = "Pixel";
+    } else if (userAgent.includes("iPhone")) {
+      const match = userAgent.match(/iPhone OS (\d+)/);
+      deviceModel = match ? "iPhone " + match[1] : "iPhone";
+      brand = "Apple";
+    } else if (userAgent.includes("iPad")) {
+      deviceModel = "iPad";
+      brand = "Apple";
+    } else if (userAgent.includes("Macintosh")) {
+      deviceModel = "Mac";
+      brand = "Apple";
+    } else if (userAgent.includes("Windows")) {
+      deviceModel = "Windows PC";
+    }
+    
+    const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
+    const userName = user.displayName || user.email || "Usuário";
+    const fullInfo = userName + " | " + (brand ? brand + " " + deviceModel : deviceModel) + " | " + browser;
+    
+    const time = new Date().toISOString();
+    sendLogToApi({ time, message: fullInfo, type: "login" });
   }
   
   function toggleMusic() {
