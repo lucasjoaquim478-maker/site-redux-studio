@@ -65,8 +65,8 @@
           const time = new Date(log.time).toLocaleString("pt-BR");
           return `<div class="log-line ${log.type}">
             <span class="log-time">[${time}]</span>
-            <span class="log-msg">${log.message}</span>
-            <span class="log-device">${log.device}</span>
+            <span class="log-msg">${log.message || "Visita"}</span>
+            <span class="log-device">${log.device || "-"}</span>
           </div>`;
         }).join("");
         

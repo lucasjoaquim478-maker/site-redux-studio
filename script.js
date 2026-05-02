@@ -429,11 +429,21 @@
       
       const userAgent = navigator.userAgent;
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      const deviceType = isMobile ? "Mobile" : "Desktop";
-      const deviceBrowser = userAgent.indexOf("Firefox") > -1 ? "Firefox" : userAgent.indexOf("Chrome") > -1 ? "Chrome" : "Other";
+      
+      let deviceModel = "Unknown";
+      if (userAgent.includes("Linux; Android")) {
+        const match = userAgent.match(/Android [^;]+;/);
+        if (match) deviceModel = match[0].replace(";", "").trim();
+      } else if (userAgent.includes("Macintosh")) {
+        deviceModel = "Mac";
+      } else if (userAgent.includes("Windows NT 10.0")) {
+        deviceModel = "Windows PC";
+      } else if (isMobile) {
+        deviceModel = "Mobile";
+      }
       
       const time = new Date().toISOString();
-      sendLogToApi({ time, message: "Nova visita: " + deviceType + " (" + deviceBrowser + ")", type: "visit" });
+      sendLogToApi({ time, message: "Nova visita", device: deviceModel, type: "visit" });
       
       dom.enterScreen.classList.add("fade-out");
       dom.mainContent.classList.add("show");
