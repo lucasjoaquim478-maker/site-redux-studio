@@ -93,8 +93,8 @@
   
   const logHistory = [];
   const MAX_LOGS = 20;
-  const LOG_BIN_ID = "685f2b89acd3cb34a7e1f2a0";
-  const LOG_API_KEY = "$2a$10$xSRf28BXKU1Uj0fSPSE5FOZIpvx8l0COn5RnuDOeKr3IdrF8uVh0i";
+  const LOG_BIN_ID = "69f554f0856a68218997c5b4";
+  const LOG_API_KEY = "$2a$10$qZ1MvIeqjEQ6RHYS2TZzDOZtrKsMoxlqShPKJiqokbiCnMS3p3V46";
   
   async function sendLogToApi(logEntry) {
     try {
