@@ -1181,3 +1181,49 @@ body {
 .card > *:nth-child(3) { animation-delay: 0.3s; }
 .card > *:nth-child(4) { animation-delay: 0.4s; }
 .card > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* ========== FRIENDS LIST ========== */
+.friends-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(88, 101, 242, 0.1);
+  border: 1px solid rgba(88, 101, 242, 0.2);
+  border-radius: 20px;
+  font-size: 0.7rem;
+}
+
+.friend-game {
+  color: #8b9eff;
+  font-weight: 500;
+}
+
+/* ========== GAME ICON PLACEHOLDER ========== */
+.game-icon-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--bg-dark);
+  flex-shrink: 0;
+}
+
+.no-touch .game-icon-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+}

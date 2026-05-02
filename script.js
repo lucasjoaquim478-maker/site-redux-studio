@@ -13,7 +13,8 @@
     spotifyBox: document.getElementById("spotify-box"),
     discordBox: document.getElementById("discord-status"),
     sessionTime: document.getElementById("session-time"),
-    dcTime: document.getElementById("dc-time"),
+    visitorCount: document.getElementById("visitor-count"),
+    friendsBox: document.getElementById("friends-box"),
     activityStatus: document.getElementById("activity-status"),
     copyBtn: document.getElementById("copy"),
     enterScreen: document.getElementById("enter-screen"),
@@ -90,8 +91,40 @@
   
   function updateTimers() {
     if (dom.sessionTime) dom.sessionTime.textContent = utils.brt();
-    if (discordStart && hasActivity && dom.dcTime) {
-      dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
+    if (discordStart && hasActivity && dom.visitorCount) {
+      dom.visitorCount.textContent = utils.formatDuration(Date.now() - discordStart);
+    }
+  }
+  
+  async function fetchVisitors() {
+    try {
+      const res = await fetch("https://api.lanyard.rest/v1/users/" + userId);
+      const data = await res.json();
+      
+      if (!data || !data.success) return;
+      
+      const d = data.data;
+      const activeCounts = d.active_counts;
+      const onlineCount = activeCounts ? (activeCounts.desktop || 0) + (activeCounts.mobile || 0) + (activeCounts.web || 0) : 0;
+      
+      if (dom.visitorCount) {
+        dom.visitorCount.textContent = onlineCount > 0 ? onlineCount : "0";
+      }
+      
+      const activities = d.activities || [];
+      const playingFriends = activities.filter(a => a.type === 0).slice(0, 5);
+      
+      if (dom.friendsBox && playingFriends.length > 0) {
+        const friends = playingFriends.map(f => {
+          return "<div class=\"friend-item\"><div class=\"friend-game\">" + utils.escapeHtml(f.name) + "</div></div>";
+        }).join("");
+        dom.friendsBox.innerHTML = "<div class=\"friends-list\">" + friends + "</div>";
+      } else if (dom.friendsBox) {
+        dom.friendsBox.innerHTML = "";
+      }
+      
+    } catch (err) {
+      console.error("Visitors error:", err);
     }
   }
   
@@ -305,6 +338,7 @@
     clearInterval(fetchInterval);
     timerInterval = setInterval(updateTimers, 1000);
     fetchStatus();
+    fetchVisitors();
     fetchInterval = setInterval(fetchStatus, FETCH_INTERVAL);
   }
   
