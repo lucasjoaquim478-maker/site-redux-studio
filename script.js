@@ -201,13 +201,20 @@
           if (dom.dcTime) dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
         }
         
-        var imgHtml = isRoblox ? "<img class=\"game-img\" src=\"https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png\" alt=\"Roblox\" onerror=\"this.style.display='none'\">" : (function() {
+        var imgHtml = "";
+        if (isRoblox) {
+          imgHtml = "<img class=\"game-img\" src=\"https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png\" alt=\"Roblox\" onerror=\"this.style.display='none'\">";
+        } else if (act.assets) {
           var url = utils.getImageUrl(act.assets, "large_image", appId) || utils.getImageUrl(act.assets, "small_image", appId);
-          return url ? "<img class=\"game-img\" src=\"" + url + "\" alt=\"Game\" onerror=\"this.style.display='none'\">" : "";
-        })();
+          if (url) {
+            imgHtml = "<img class=\"game-img\" src=\"" + url + "\" alt=\"Game\" onerror=\"this.style.display='none'\">";
+          } else if (act.application_id) {
+            imgHtml = "<div class=\"game-icon-placeholder\">" + (act.name ? act.name.charAt(0).toUpperCase() : "?") + "</div>";
+          }
+        }
         
         if (dom.discordBox) {
-          dom.discordBox.innerHTML = "<div class=\"dc" + (isRoblox ? " roblox-card" : "") + ">" + imgHtml + "<div class=\"dc-info\"><div class=\"game-name\">" + utils.escapeHtml(act.name) + "</div><div class=\"dc-time\">" + (discordStart ? utils.formatDuration(Date.now() - discordStart) : "00:00") + "</div></div></div>";
+          dom.discordBox.innerHTML = "<div class=\"dc" + (isRoblox ? " roblox-card" : "") + "\">" + imgHtml + "<div class=\"dc-info\"><div class=\"game-name\">" + utils.escapeHtml(act.name) + "</div><div class=\"dc-time\">" + (discordStart ? utils.formatDuration(Date.now() - discordStart) : "00:00") + "</div></div></div>";
         }
       } else {
         if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
