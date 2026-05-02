@@ -583,63 +583,6 @@
       if (hasEntered) return;
       enterApp();
     });
-      const screenSize = window.screen.width + "x" + window.screen.height;
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
-      let deviceModel = "Desktop";
-      let brand = "";
-      
-      if (userAgent.includes("Linux; Android")) {
-        const match = userAgent.match(/Linux; Android ([^;]+)/);
-        if (match) deviceModel = match[1].trim();
-        
-        if (userAgent.includes("Samsung")) brand = "Samsung";
-        else if (userAgent.includes("Xiaomi")) brand = "Xiaomi";
-        else if (userAgent.includes("Motorola")) brand = "Motorola";
-        else if (userAgent.includes("Pixel")) brand = "Pixel";
-      } else if (userAgent.includes("iPhone")) {
-        const match = userAgent.match(/iPhone OS (\d+)/);
-        deviceModel = match ? "iPhone " + match[1] : "iPhone";
-        brand = "Apple";
-      } else if (userAgent.includes("iPad")) {
-        deviceModel = "iPad";
-        brand = "Apple";
-      } else if (userAgent.includes("Macintosh")) {
-        deviceModel = "Mac";
-        brand = "Apple";
-      } else if (userAgent.includes("Windows")) {
-        deviceModel = "Windows PC";
-      }
-      
-      const browser = userAgent.includes("Chrome") ? "Chrome" : userAgent.includes("Firefox") ? "Firefox" : userAgent.includes("Safari") ? "Safari" : "Outro";
-      
-      const deviceInfo = brand ? brand + " " + deviceModel : deviceModel;
-      const fullInfo = deviceInfo + " | " + browser + " | " + screenSize;
-      
-      const time = new Date().toISOString();
-      sendLogToApi({ time, message: fullInfo, type: "visit" });
-      
-      dom.enterScreen.classList.add("fade-out");
-      dom.mainContent.classList.add("show");
-      document.body.style.overflow = "auto";
-      
-      setTimeout(function() {
-        dom.enterScreen.style.display = "none";
-      }, 600);
-      
-      if (dom.bgMusic) {
-        dom.bgMusic.volume = 0.15;
-        dom.bgMusic.play().then(function() {
-          isPlaying = true;
-        }).catch(function() {
-          console.log("Music autoplay blocked - user needs to interact first");
-        });
-      }
-      
-      startApp();
-      initParticles();
-      dom.enterScreen.removeEventListener(enterEvent, handler);
-    });
   }
   
   window.addEventListener("beforeunload", function() {
