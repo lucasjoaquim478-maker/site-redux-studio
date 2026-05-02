@@ -95,9 +95,7 @@
   
   async function sendLogToApi(logEntry) {
     try {
-      const currentRes = await fetch(`https://api.jsonbin.io/v3/b/${LOG_BIN_ID}/latest`, {
-        headers: { "X-Access-Key": LOG_API_KEY }
-      });
+      const currentRes = await fetch(`https://api.jsonbin.io/v3/b/${LOG_BIN_ID}/latest?fetch=true`);
       const currentData = await currentRes.json();
       const logs = currentData.record?.logs || [];
       logs.unshift(logEntry);
@@ -106,7 +104,6 @@
       await fetch(`https://api.jsonbin.io/v3/b/${LOG_BIN_ID}`, {
         method: "PUT",
         headers: {
-          "X-Access-Key": LOG_API_KEY,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ logs: trimmedLogs })

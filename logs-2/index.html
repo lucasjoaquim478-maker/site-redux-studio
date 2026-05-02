@@ -43,16 +43,13 @@
   </div>
   <script>
     const BIN_ID = "69f5565eaaba8821975fc35a";
-    const API_KEY = "$2a$10$qZ1MvIeqjEQ6RHYS2TZzDOZtrKsMoxlqShPKJiqokbiCnMS3p3V46";
     
     async function fetchLogs() {
       try {
         document.getElementById("status").className = "status offline";
         document.getElementById("status").textContent = "Carregando...";
         
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { "X-Access-Key": API_KEY }
-        });
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?fetch=true`);
         
         if (!res.ok) throw new Error("API error");
         
