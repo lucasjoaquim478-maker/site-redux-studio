@@ -90,7 +90,7 @@
     }
   };
   
-  const LOG_BIN_ID = "69f554f0856a68218997c5b4";
+  const LOG_BIN_ID = "69f5565eaaba8821975fc35a";
   const LOG_API_KEY = "$2a$10$qZ1MvIeqjEQ6RHYS2TZzDOZtrKsMoxlqShPKJiqokbiCnMS3p3V46";
   
   async function sendLogToApi(logEntry) {
