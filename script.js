@@ -17,10 +17,6 @@
     friendsBox: document.getElementById("friends-box"),
     activityStatus: document.getElementById("activity-status"),
     copyBtn: document.getElementById("copy"),
-    loginBtn: document.getElementById("login-google"),
-    loginText: document.getElementById("login-text"),
-    loginEnterBtn: document.getElementById("login-enter"),
-    loginEnterText: document.getElementById("login-enter-text"),
     welcomeCard: document.getElementById("welcome-card"),
     welcomeText: document.getElementById("welcome-text"),
     enterScreen: document.getElementById("enter-screen"),
@@ -163,6 +159,7 @@
   
   async function fetchStatus() {
     try {
+      console.log("Fetching status from Lanyard...");
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
       
@@ -177,6 +174,7 @@
       }
       
       const data = await res.json();
+      console.log("Lanyard response:", data);
       
       if (!data || !data.success) {
         retryCount++;
