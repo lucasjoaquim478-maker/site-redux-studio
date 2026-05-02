@@ -2,29 +2,123 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DEV LOGS</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; color: #e4e4e7; font-family: 'JetBrains Mono', monospace; min-height: 100vh; padding: 20px; }
-    .logs-container { max-width: 600px; margin: 0 auto; }
-    .logs-header { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.2); border-radius: 12px; margin-bottom: 16px; }
-    .logs-header h1 { font-size: 1rem; color: #00ffcc; flex: 1; }
-    .status { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
-    .status.offline { background: #80848e; }
-    .status.online { background: #23a55a; }
-    .status.error { background: #f23f43; }
-    .logs-header button { background: #00ffcc; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .logs-body { background: rgba(10, 10, 15, 0.9); border: 1px solid rgba(0, 255, 204, 0.15); border-radius: 12px; padding: 12px; max-height: 70vh; overflow-y: auto; }
-    .log-line { padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.75rem; display: flex; gap: 12px; }
+    :root {
+      --primary: #00ffcc;
+      --primary-dark: #00cc99;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(10, 10, 15, 0.95);
+      --border: rgba(0, 255, 204, 0.15);
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+    }
+    body { 
+      background: var(--bg-dark); 
+      color: var(--text); 
+      font-family: 'JetBrains Mono', monospace; 
+      min-height: 100vh; 
+      padding: 12px;
+    }
+    .logs-container { 
+      max-width: 700px; 
+      margin: 0 auto; 
+    }
+    .logs-header { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 14px 16px; 
+      background: rgba(0, 255, 204, 0.1); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      margin-bottom: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logs-header h1 { 
+      font-size: 0.95rem; 
+      color: var(--primary); 
+      flex: 1; 
+    }
+    .status { 
+      padding: 4px 10px; 
+      border-radius: 20px; 
+      font-size: 0.65rem; 
+      font-weight: 600; 
+    }
+    .status.offline { background: #80848e; color: #fff; }
+    .status.online { background: #23a55a; color: #fff; }
+    .status.error { background: #f23f43; color: #fff; }
+    .logs-header button { 
+      background: var(--primary); 
+      border: none; 
+      padding: 8px 14px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .logs-header button:active { transform: scale(0.95); }
+    .logs-body { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      padding: 8px; 
+      max-height: calc(100vh - 100px); 
+      overflow-y: auto; 
+    }
+    .log-line { 
+      padding: 10px 12px; 
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04); 
+      font-size: 0.72rem; 
+      display: flex; 
+      flex-direction: column;
+      gap: 4px;
+    }
     .log-line:last-child { border-bottom: none; }
-    .log-time { color: #00ffcc; }
-    .log-msg { flex: 1; color: #8b9eff; }
-    .log-device { color: #71717a; font-size: 0.65rem; }
+    .log-top { display: flex; gap: 10px; align-items: center; }
+    .log-time { color: var(--primary); font-size: 0.68rem; }
+    .log-msg { color: #8b9eff; font-weight: 500; }
+    .log-info { color: var(--text-muted); font-size: 0.65rem; }
     .log-line.visit { border-left: 3px solid #23a55a; }
-    .log-line.exit { border-left: 3px solid #f23f43; }
-    .log-line.error { color: #f23f43; }
-    .log-line.empty, .log-line.loading { color: #71717a; text-align: center; }
+    .log-line.login { border-left: 3px solid #8b5cf6; }
+    .log-line.empty, .log-line.loading { color: var(--text-muted); text-align: center; padding: 20px; }
+    
+    .stats-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat-item {
+      flex: 1;
+      background: rgba(0, 255, 204, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.2rem; color: var(--primary); font-weight: 700; }
+    .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
+
+    @media (min-width: 500px) {
+      body { padding: 20px; }
+      .logs-header { padding: 16px 20px; }
+      .logs-header h1 { font-size: 1.1rem; }
+      .log-line { 
+        flex-direction: row;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      .log-msg { flex: 1; }
+      .log-time { font-size: 0.72rem; width: 140px; }
+      .log-info { width: 200px; text-align: right; }
+      .stats-bar { gap: 12px; }
+      .stat-item { padding: 14px; }
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,10 +129,24 @@
     <div class="logs-header">
       <h1>DEV LOGS</h1>
       <span id="status" class="status offline">Offline</span>
-      <button onclick="fetchLogs()">↻ Atualizar</button>
+      <button onclick="fetchLogs()">↻</button>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num" id="total-visits">0</div>
+        <div class="stat-label">Total Visits</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="today-visits">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="online-now">0</div>
+        <div class="stat-label">Online</div>
+      </div>
     </div>
     <div id="logs-body" class="logs-body">
-      <div class="log-line loading">Carregando...</div>
+      <div class="log-line loading">Carregando logs...</div>
     </div>
   </div>
   <script>
@@ -56,17 +164,26 @@
         const data = await res.json();
         const logs = data.record?.logs || [];
         
+        const hoje = new Date().toDateString();
+        const visitsToday = logs.filter(l => new Date(l.time).toDateString() === hoje).length;
+        
+        document.getElementById("total-visits").textContent = logs.length;
+        document.getElementById("today-visits").textContent = visitsToday;
+        document.getElementById("online-now").textContent = logs.filter(l => l.type === "login").length;
+        
         if (logs.length === 0) {
           document.getElementById("logs-body").innerHTML = '<div class="log-line empty">Nenhuma visita ainda</div>';
           return;
         }
         
-        document.getElementById("logs-body").innerHTML = logs.slice(0, 50).map(log => {
-          const time = new Date(log.time).toLocaleString("pt-BR");
-          return `<div class="log-line ${log.type}">
-            <span class="log-time">[${time}]</span>
-            <span class="log-msg">${log.message || "Visita"}</span>
-            <span class="log-device">${log.device || "-"}</span>
+        document.getElementById("logs-body").innerHTML = logs.slice(0, 100).map(log => {
+          const time = new Date(log.time);
+          const timeStr = time.toLocaleString("pt-BR");
+          const msg = log.message || "Visita";
+          const typeClass = log.type || "visit";
+          return `<div class="log-line ${typeClass}">
+            <span class="log-time">[${timeStr}]</span>
+            <span class="log-msg">${msg}</span>
           </div>`;
         }).join("");
         
@@ -79,12 +196,8 @@
       }
     }
     
-    function refreshLogs() {
-      fetchLogs();
-    }
-    
     fetchLogs();
-    setInterval(fetchLogs, 5000);
+    setInterval(fetchLogs, 3000);
   </script>
 </body>
 </html>
