@@ -548,6 +548,26 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.btn-login-enter {
+  margin: 20px auto 16px;
+  width: auto;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: var(--cursor);
+}
+
+.btn-login-enter:hover {
+  background: #f5f5f5;
+}
+
 .no-touch .btn-glow {
   padding: 14px;
   font-size: 0.9rem;
