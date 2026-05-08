@@ -39,7 +39,7 @@
   let hasEntered = false;
   let isPlaying = false;
   let currentUser = null;
-  const isDev = userId === userId;
+  const isDev = true;
   
   const utils = {
     formatDuration(ms) {
@@ -94,7 +94,6 @@
   };
   
   const LOG_BIN_ID = "69f5565eaaba8821975fc35a";
-  const LOG_API_KEY = "$2a$10$qZ1MvIeqjEQ6RHYS2TZzDOZtrKsMoxlqShPKJiqokbiCnMS3p3V46";
   
   async function sendLogToApi(logEntry) {
     try {
@@ -140,18 +139,6 @@
         dom.visitorCount.textContent = isDev ? (onlineCount > 0 ? onlineCount : "0") : "";
       }
       
-      const activities = d.activities || [];
-      const playingFriends = activities.filter(a => a.type === 0).slice(0, 5);
-      
-      if (dom.friendsBox && playingFriends.length > 0) {
-        const friends = playingFriends.map(f => {
-          return "<div class=\"friend-item\"><div class=\"friend-game\">" + utils.escapeHtml(f.name) + "</div></div>";
-        }).join("");
-        dom.friendsBox.innerHTML = "<div class=\"friends-list\">" + friends + "</div>";
-      } else if (dom.friendsBox) {
-        dom.friendsBox.innerHTML = "";
-      }
-      
     } catch (err) {
       console.error("Visitors error:", err);
     }
@@ -178,6 +165,7 @@
         retryCount++;
         if (retryCount >= MAX_RETRIES) {
           if (dom.activityStatus) dom.activityStatus.textContent = "Offline";
+          if (dom.statusEl) dom.statusEl.className = "status-offline";
         }
         return;
       }
@@ -197,7 +185,7 @@
       }
       
       if (dom.username) {
-        dom.username.textContent = user.username;
+        dom.username.textContent = user.global_name || user.username;
         dom.username.classList.add("text-glow");
       }
       
@@ -260,7 +248,6 @@
             discordStart = act.timestamps.start;
             currentGameStart = act.timestamps.start;
           }
-          if (dom.dcTime) dom.dcTime.textContent = utils.formatDuration(Date.now() - discordStart);
         }
         
         var imgHtml = "";
@@ -282,7 +269,6 @@
         if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
         discordStart = null;
         currentGameStart = null;
-        if (dom.dcTime) dom.dcTime.textContent = "--:--";
         if (dom.discordBox) dom.discordBox.innerHTML = "";
       }
       
@@ -383,6 +369,7 @@
   }
   
   function enterApp() {
+    if (hasEntered) return;
     hasEntered = true;
     
     const userAgent = navigator.userAgent;
@@ -428,12 +415,17 @@
       }, 5000);
     }
     
-    dom.enterScreen.classList.add("fade-out");
-    dom.mainContent.classList.add("show");
+    if (dom.enterScreen) {
+      dom.enterScreen.classList.add("fade-out");
+      dom.enterScreen.style.pointerEvents = "none";
+    }
+    
+    if (dom.mainContent) {
+      dom.mainContent.classList.add("show");
+    }
+    
     document.body.style.overflow = "auto";
-    setTimeout(function() {
-      if (dom.enterScreen) dom.enterScreen.style.display = "none";
-    }, 600);
+    
     startApp();
     initParticles();
   }
@@ -488,15 +480,20 @@
   
   function initParticles() {
     var canvas = dom.particlesCanvas;
-    var ctx = canvas && canvas.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
+    var resizeTimer;
     window.addEventListener("resize", function() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }, 200);
     });
     
     var particleCount = isTouch ? 25 : 60;
@@ -536,12 +533,16 @@
     if (dom.enterTitle) dom.enterTitle.textContent = isTouch ? "Toque para entrar" : "Clique para entrar";
     if (dom.enterHintText) dom.enterHintText.textContent = isTouch ? "Toque em qualquer lugar" : "Clique em qualquer lugar";
     
-    var enterEvent = isTouch ? "touchstart" : "click";
-    
-    dom.enterScreen.addEventListener(enterEvent, function handler(e) {
+    dom.enterScreen.addEventListener("click", function handler(e) {
       if (hasEntered) return;
       enterApp();
     });
+    
+    dom.enterScreen.addEventListener("touchstart", function handler(e) {
+      if (hasEntered) return;
+      e.preventDefault();
+      enterApp();
+    }, { passive: false });
   }
   
   window.addEventListener("beforeunload", function() {
