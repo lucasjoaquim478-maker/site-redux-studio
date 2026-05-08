@@ -14,6 +14,9 @@
       --border: rgba(0, 255, 204, 0.15);
       --text: #e4e4e7;
       --text-muted: #71717a;
+      --success: #23a55a;
+      --warning: #f59e0b;
+      --error: #f23f43;
     }
     body { 
       background: var(--bg-dark); 
@@ -22,10 +25,8 @@
       min-height: 100vh; 
       padding: 12px;
     }
-    .logs-container { 
-      max-width: 700px; 
-      margin: 0 auto; 
-    }
+    .logs-container { max-width: 800px; margin: 0 auto; }
+    
     .logs-header { 
       display: flex; 
       align-items: center; 
@@ -38,22 +39,31 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      flex-wrap: wrap;
     }
-    .logs-header h1 { 
-      font-size: 0.95rem; 
-      color: var(--primary); 
-      flex: 1; 
-    }
+    .logs-header h1 { font-size: 0.95rem; color: var(--primary); }
     .status { 
       padding: 4px 10px; 
       border-radius: 20px; 
       font-size: 0.65rem; 
       font-weight: 600; 
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
     }
     .status.offline { background: #80848e; color: #fff; }
     .status.online { background: #23a55a; color: #fff; }
     .status.error { background: #f23f43; color: #fff; }
-    .logs-header button { 
+    .status.loading { background: var(--warning); color: #000; }
+    .btn-group { display: flex; gap: 8px; margin-left: auto; }
+    .btn { 
       background: var(--primary); 
       border: none; 
       padding: 8px 14px; 
@@ -61,16 +71,82 @@
       cursor: pointer; 
       font-weight: 600;
       font-size: 0.75rem;
+      color: #000;
+      transition: all 0.2s;
     }
-    .logs-header button:active { transform: scale(0.95); }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn:active { transform: scale(0.95); }
+    .btn.icon { padding: 8px; }
+    
+    .search-bar {
+      width: 100%;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .search-bar.show { display: block; }
+    .search-bar input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .search-bar input:focus { outline: none; border-color: var(--primary); }
+    
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat-item {
+      background: rgba(0, 255, 204, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .stat-item:hover { border-color: var(--primary); }
+    .stat-num { font-size: 1.2rem; color: var(--primary); font-weight: 700; }
+    .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+    
+    .filters {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+    
     .logs-body { 
       background: var(--bg-card); 
       border: 1px solid var(--border); 
       border-radius: 12px; 
       padding: 8px; 
-      max-height: calc(100vh - 100px); 
-      overflow-y: auto; 
+      max-height: calc(100vh - 280px); 
+      overflow-y: auto;
     }
+    .logs-body::-webkit-scrollbar { width: 6px; }
+    .logs-body::-webkit-scrollbar-track { background: transparent; }
+    .logs-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    
     .log-line { 
       padding: 10px 12px; 
       border-bottom: 1px solid rgba(255, 255, 255, 0.04); 
@@ -78,36 +154,87 @@
       display: flex; 
       flex-direction: column;
       gap: 4px;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+      position: relative;
     }
+    .log-line:hover { background: rgba(0, 255, 204, 0.05); }
     .log-line:last-child { border-bottom: none; }
-    .log-top { display: flex; gap: 10px; align-items: center; }
+    .log-line.new { animation: highlight 2s ease-out; }
+    @keyframes highlight {
+      0% { background: rgba(0, 255, 204, 0.2); }
+      100% { background: transparent; }
+    }
+    .log-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .log-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .log-badge.visit { background: rgba(35, 165, 90, 0.2); color: var(--success); }
+    .log-badge.login { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .log-badge.error { background: rgba(242, 63, 67, 0.2); color: var(--error); }
     .log-time { color: var(--primary); font-size: 0.68rem; }
-    .log-msg { color: #8b9eff; font-weight: 500; }
+    .log-msg { color: #8b9eff; font-weight: 500; flex: 1; }
     .log-info { color: var(--text-muted); font-size: 0.65rem; }
-    .log-line.visit { border-left: 3px solid #23a55a; }
-    .log-line.login { border-left: 3px solid #8b5cf6; }
-    .log-line.empty, .log-line.loading { color: var(--text-muted); text-align: center; padding: 20px; }
-    
-    .stats-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+    .log-actions {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
     }
-    .stat-item {
-      flex: 1;
-      background: rgba(0, 255, 204, 0.08);
+    .log-line:hover .log-actions { opacity: 1; }
+    .copy-btn {
+      background: transparent;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      cursor: pointer;
+      font-family: inherit;
     }
-    .stat-num { font-size: 1.2rem; color: var(--primary); font-weight: 700; }
-    .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
+    .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+    
+    .empty-state, .loading-state, .error-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state svg, .loading-state svg, .error-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    .error-state { color: var(--error); }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     @media (min-width: 500px) {
       body { padding: 20px; }
       .logs-header { padding: 16px 20px; }
       .logs-header h1 { font-size: 1.1rem; }
+      .search-bar { display: block; }
       .log-line { 
         flex-direction: row;
         gap: 12px;
@@ -116,6 +243,7 @@
       .log-msg { flex: 1; }
       .log-time { font-size: 0.72rem; width: 140px; }
       .log-info { width: 200px; text-align: right; }
+      .log-actions { position: static; opacity: 1; transform: none; }
       .stats-bar { gap: 12px; }
       .stat-item { padding: 14px; }
     }
@@ -129,8 +257,17 @@
     <div class="logs-header">
       <h1>DEV LOGS</h1>
       <span id="status" class="status offline">Offline</span>
-      <button onclick="fetchLogs()">↻</button>
+      <div class="btn-group">
+        <button class="btn icon" onclick="toggleSearch()" title="Buscar">🔍</button>
+        <button class="btn icon" onclick="exportLogs()" title="Exportar">📥</button>
+        <button class="btn" onclick="fetchLogs()">↻ Atualizar</button>
+      </div>
     </div>
+    
+    <div id="search-bar" class="search-bar">
+      <input type="text" id="search-input" placeholder="Buscar nos logs..." oninput="filterLogs()">
+    </div>
+    
     <div class="stats-bar">
       <div class="stat-item">
         <div class="stat-num" id="total-visits">0</div>
@@ -145,59 +282,175 @@
         <div class="stat-label">Online</div>
       </div>
     </div>
+    
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all', this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('visit', this)">Visitas</button>
+      <button class="filter-btn" onclick="setFilter('login', this)">Logins</button>
+      <button class="filter-btn" onclick="setFilter('error', this)">Erros</button>
+    </div>
+    
     <div id="logs-body" class="logs-body">
-      <div class="log-line loading">Carregando logs...</div>
+      <div class="loading-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div>Carregando logs...</div>
+      </div>
     </div>
   </div>
+  
+  <div id="toast" class="toast">Copiado!</div>
+  
   <script>
     const BIN_ID = "69f5565eaaba8821975fc35a";
+    let allLogs = [];
+    let currentFilter = 'all';
+    let lastCount = 0;
+    
+    function formatTime(date) {
+      const now = new Date();
+      const diff = now - date;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'Agora';
+      if (minutes < 60) return `Há ${minutes}m`;
+      if (hours < 24) return `Há ${hours}h`;
+      if (days < 7) return `Há ${days}d`;
+      return date.toLocaleString("pt-BR");
+    }
+    
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+    
+    function toggleSearch() {
+      const bar = document.getElementById('search-bar');
+      bar.classList.toggle('show');
+      if (bar.classList.contains('show')) {
+        document.getElementById('search-input').focus();
+      }
+    }
+    
+    function setFilter(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLogs();
+    }
+    
+    function filterLogs() {
+      renderLogs();
+    }
+    
+    function copyLog(log) {
+      const text = `[${new Date(log.time).toLocaleString("pt-BR")}] ${log.message || "Visita"}`;
+      navigator.clipboard.writeText(text);
+      showToast('Copiado!');
+    }
+    
+    function exportLogs() {
+      const data = JSON.stringify(allLogs, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dev-logs-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exportado!');
+    }
+    
+    function renderLogs() {
+      const body = document.getElementById('logs-body');
+      const search = document.getElementById('search-input').value.toLowerCase();
+      
+      let filtered = allLogs;
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(l => l.type === currentFilter);
+      }
+      if (search) {
+        filtered = filtered.filter(l => 
+          (l.message || '').toLowerCase().includes(search) ||
+          (l.info || '').toLowerCase().includes(search)
+        );
+      }
+      
+      if (filtered.length === 0) {
+        body.innerHTML = `<div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <div>Nenhum log encontrado</div>
+        </div>`;
+        return;
+      }
+      
+      body.innerHTML = filtered.map((log, i) => {
+        const time = new Date(log.time);
+        const typeClass = log.type || 'visit';
+        const badgeClass = typeClass === 'error' ? 'error' : typeClass;
+        const isNew = i < (allLogs.length - lastCount) && lastCount > 0;
+        return `<div class="log-line ${badgeClass} ${isNew ? 'new' : ''}">
+          <div class="log-top">
+            <span class="log-badge ${badgeClass}">${typeClass}</span>
+            <span class="log-time">${formatTime(time)}</span>
+            <span class="log-msg">${log.message || "Visita"}</span>
+          </div>
+          <div class="log-info">${time.toLocaleString("pt-BR")}</div>
+          <div class="log-actions">
+            <button class="copy-btn" onclick='copyLog(${JSON.stringify(log)})'>Copiar</button>
+          </div>
+        </div>`;
+      }).join("");
+    }
     
     async function fetchLogs() {
       try {
-        document.getElementById("status").className = "status offline";
-        document.getElementById("status").textContent = "Carregando...";
+        const statusEl = document.getElementById("status");
+        statusEl.className = "status loading";
+        statusEl.textContent = "Sincronizando...";
         
         const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?fetch=true`);
         
         if (!res.ok) throw new Error("API error");
         
         const data = await res.json();
-        const logs = data.record?.logs || [];
+        allLogs = data.record?.logs || [];
+        lastCount = allLogs.length;
         
         const hoje = new Date().toDateString();
-        const visitsToday = logs.filter(l => new Date(l.time).toDateString() === hoje).length;
+        const visitsToday = allLogs.filter(l => new Date(l.time).toDateString() === hoje).length;
         
-        document.getElementById("total-visits").textContent = logs.length;
+        document.getElementById("total-visits").textContent = allLogs.length;
         document.getElementById("today-visits").textContent = visitsToday;
-        document.getElementById("online-now").textContent = logs.filter(l => l.type === "login").length;
+        document.getElementById("online-now").textContent = allLogs.filter(l => l.type === "login").length;
         
-        if (logs.length === 0) {
-          document.getElementById("logs-body").innerHTML = '<div class="log-line empty">Nenhuma visita ainda</div>';
-          return;
+        if (allLogs.length === 0) {
+          document.getElementById("logs-body").innerHTML = `<div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div>Nenhuma visita ainda</div>
+          </div>`;
+        } else {
+          renderLogs();
         }
         
-        document.getElementById("logs-body").innerHTML = logs.slice(0, 100).map(log => {
-          const time = new Date(log.time);
-          const timeStr = time.toLocaleString("pt-BR");
-          const msg = log.message || "Visita";
-          const typeClass = log.type || "visit";
-          return `<div class="log-line ${typeClass}">
-            <span class="log-time">[${timeStr}]</span>
-            <span class="log-msg">${msg}</span>
-          </div>`;
-        }).join("");
-        
-        document.getElementById("status").className = "status online";
-        document.getElementById("status").textContent = "Online";
+        statusEl.className = "status online";
+        statusEl.textContent = "Online";
       } catch (err) {
         document.getElementById("status").className = "status error";
         document.getElementById("status").textContent = "Erro";
-        document.getElementById("logs-body").innerHTML = `<div class="log-line error">Erro: ${err.message}</div>`;
+        document.getElementById("logs-body").innerHTML = `<div class="error-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <div>Erro: ${err.message}</div>
+          <button class="btn" onclick="fetchLogs()" style="margin-top: 12px;">Tentar novamente</button>
+        </div>`;
       }
     }
     
     fetchLogs();
-    setInterval(fetchLogs, 3000);
+    setInterval(fetchLogs, 5000);
   </script>
 </body>
 </html>
