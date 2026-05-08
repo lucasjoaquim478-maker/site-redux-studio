@@ -420,6 +420,11 @@ body {
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.dc:last-child {
+  margin-bottom: 0;
 }
 
 .no-touch .dc {
