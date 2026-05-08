@@ -16,6 +16,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
 body {
   min-height: 100vh;
   display: flex;
@@ -27,6 +32,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .no-touch body {
@@ -64,7 +70,6 @@ body {
     radial-gradient(ellipse at 80% 20%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
     var(--bg-dark);
   z-index: 1000;
-  cursor: var(--cursor);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -72,6 +77,7 @@ body {
   opacity: 0;
   transform: scale(1.1);
   pointer-events: none;
+  visibility: hidden;
 }
 
 .enter-content {
@@ -153,9 +159,10 @@ body {
   transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   min-height: 100vh;
+  padding: 20px 0;
 }
 
 .main-content.show {
@@ -262,28 +269,10 @@ body {
   z-index: 2;
 }
 
-#status-indicator.status-idle {
-  border-color: transparent;
-  width: 18px;
-  height: 18px;
-  bottom: 0;
-  right: 0;
-}
-
 .status-online { background: #23a55a; box-shadow: 0 0 8px #23a55a; }
-.status-idle { background: transparent; box-shadow: none; }
+.status-idle { background: #f59e0b; }
 .status-dnd { background: #f23f43; box-shadow: 0 0 8px #f23f43; }
 .status-offline { background: #80848e; }
-
-.status-idle::after {
-  content: "\1F319";
-  position: absolute;
-  font-size: 12px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  line-height: 1;
-}
 
 .user-info h1 {
   font-size: 1.25rem;
@@ -301,6 +290,12 @@ body {
   display: flex;
   gap: 6px;
   margin-top: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.touch .bio {
+  justify-content: center;
 }
 
 .badge {
@@ -332,7 +327,6 @@ body {
   padding: 14px;
   border-radius: 16px;
   transition: transform 0.2s ease;
-  cursor: var(--cursor);
 }
 
 .no-touch .spotify {
@@ -341,11 +335,16 @@ body {
   border-radius: 18px;
 }
 
+.spotify:active {
+  transform: scale(0.98);
+}
+
 .spotify img {
   width: 54px;
   height: 54px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  object-fit: cover;
 }
 
 .no-touch .spotify img {
@@ -354,7 +353,7 @@ body {
   border-radius: 12px;
 }
 
-.spotify:hover {
+.no-touch .spotify:hover {
   transform: scale(1.02);
 }
 
@@ -421,7 +420,6 @@ body {
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease;
-  position: relative;
 }
 
 .no-touch .dc {
@@ -430,8 +428,12 @@ body {
   border-radius: 14px;
 }
 
-.dc:hover {
+.no-touch .dc:hover {
   transform: scale(1.01);
+}
+
+.dc:active {
+  transform: scale(0.98);
 }
 
 .dc.roblox-card {
@@ -542,30 +544,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: var(--cursor);
+  cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-login-enter {
-  margin: 20px auto 16px;
-  width: auto;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 14px;
-  background: #fff;
-  color: #333;
-  font-weight: 600;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: var(--cursor);
-}
-
-.btn-login-enter:hover {
-  background: #f5f5f5;
 }
 
 .no-touch .btn-glow {
@@ -573,6 +555,7 @@ body {
   font-size: 0.9rem;
   border-radius: 16px;
   margin-top: 24px;
+  cursor: var(--cursor);
 }
 
 .btn-glow::before {
@@ -584,11 +567,11 @@ body {
   transition: transform 0.5s ease;
 }
 
-.btn-glow:hover::before {
+.no-touch .btn-glow:hover::before {
   transform: translateX(100%);
 }
 
-.btn-glow:hover {
+.no-touch .btn-glow:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px var(--primary-glow);
 }
@@ -648,11 +631,13 @@ body {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   border-radius: 12px 12px 0 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .no-touch .music-handle {
   padding: 10px 12px;
   font-size: 0.7rem;
+  cursor: var(--cursor);
 }
 
 .music-handle svg {
@@ -697,7 +682,6 @@ body {
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.08);
   outline: none;
-  cursor: var(--cursor);
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -708,7 +692,7 @@ body {
   border-radius: 50%;
   background: var(--primary);
   box-shadow: 0 0 6px var(--primary-glow);
-  cursor: var(--cursor);
+  cursor: pointer;
   transition: transform 0.15s ease;
 }
 
@@ -723,7 +707,7 @@ body {
   background: var(--primary);
   box-shadow: 0 0 6px var(--primary-glow);
   border: none;
-  cursor: var(--cursor);
+  cursor: pointer;
 }
 
 .track-control {
@@ -742,19 +726,24 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: var(--cursor);
+  cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .no-touch .track-btn {
   width: 28px;
   height: 28px;
   border-radius: 8px;
+  cursor: var(--cursor);
 }
 
 .track-btn:hover {
   background: rgba(0, 255, 204, 0.15);
+}
+
+.no-touch .track-btn:hover {
   transform: scale(1.05);
 }
 
@@ -787,66 +776,28 @@ body {
 
 .no-touch .track-name {
   font-size: 0.65rem;
+  cursor: var(--cursor);
 }
 
 .track-name:hover {
   color: var(--primary);
 }
 
-/* ========== ERROR STATES ========== */
-.spotify-error,
-.dc-error {
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-align: center;
-  background: rgba(255, 68, 68, 0.05);
-  border: 1px solid rgba(255, 68, 68, 0.15);
-}
-
 /* ========== MOBILE ========== */
 @media (max-width: 480px) {
-  .music-control {
-    width: 150px;
-    top: 10px;
-    right: 10px;
-  }
-
-  .music-control,
-  .music-handle,
-  .track-btn,
-  .volume-slider {
-    cursor: default !important;
-  }
-
   body {
-    overflow-y: auto;
     padding: 20px 12px;
-    cursor: default !important;
   }
 
   .main-content {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    align-items: flex-start;
+    min-height: auto;
     padding-top: 20px;
+    padding-bottom: 20px;
   }
 
   .card {
     padding: 20px;
     border-radius: 20px;
-    max-width: 100%;
-  }
-
-  .bio {
-    justify-content: center;
-  }
-
-  .user-info h1 {
-    font-size: 1.1rem;
   }
 
   .stats {
@@ -879,37 +830,15 @@ body {
     border-radius: 8px;
   }
 
-  .roblox-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-  }
-
   .spotify-info .title,
   .dc-info .game-name {
     font-size: 0.75rem;
-  }
-
-  .spotify-info .artist {
-    font-size: 0.7rem;
-  }
-
-  .spotify-times {
-    font-size: 0.6rem;
-  }
-
-  .dc-time {
-    font-size: 0.65rem;
   }
 
   .btn-glow {
     padding: 11px;
     font-size: 0.8rem;
     border-radius: 12px;
-  }
-
-  .enter-screen {
-    cursor: auto;
   }
 
   .enter-icon {
@@ -935,6 +864,11 @@ body {
   .enter-hint {
     font-size: 0.65rem;
   }
+
+  .welcome-card {
+    top: 10px;
+    right: 10px;
+  }
 }
 
 @media (max-height: 700px) and (max-width: 480px) {
@@ -945,10 +879,6 @@ body {
   .avatar {
     width: 60px;
     height: 60px;
-  }
-
-  .avatar-box {
-    width: 60px;
   }
 
   .avatar-glow {
@@ -981,30 +911,6 @@ body {
     margin-top: 12px;
     padding: 10px;
   }
-}
-
-/* ========== DESKTOP ENHANCEMENTS ========== */
-.no-touch .spotify:hover,
-.no-touch .dc:hover {
-  transform: scale(1.02);
-  transition: transform 0.2s ease;
-}
-
-.no-touch .btn-glow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--primary-glow);
-}
-
-/* ========== TOUCH DEVICE OVERRIDES ========== */
-.touch * {
-  cursor: default !important;
-}
-
-.touch .enter-screen,
-.touch .btn-glow,
-.touch .track-btn,
-.touch .music-handle {
-  cursor: default !important;
 }
 
 /* ========== POPUP ========== */
@@ -1085,7 +991,7 @@ body {
   border-radius: 14px;
   font-size: 0.9rem;
   font-weight: 600;
-  cursor: var(--cursor);
+  cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -1143,19 +1049,6 @@ body {
   box-shadow: 0 8px 32px rgba(242, 63, 67, 0.4);
 }
 
-/* ========== LOADING ANIMATION ========== */
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-.loading-skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-  border-radius: 8px;
-}
-
 /* ========== SCROLLBAR ========== */
 ::-webkit-scrollbar {
   width: 8px;
@@ -1179,28 +1072,6 @@ body {
 .text-glow {
   text-shadow: 0 0 10px var(--primary-glow), 0 0 20px var(--primary-glow);
 }
-
-/* ========== FADE IN ANIMATION ========== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card > * {
-  animation: fadeInUp 0.5s ease forwards;
-}
-
-.card > *:nth-child(1) { animation-delay: 0.1s; }
-.card > *:nth-child(2) { animation-delay: 0.2s; }
-.card > *:nth-child(3) { animation-delay: 0.3s; }
-.card > *:nth-child(4) { animation-delay: 0.4s; }
-.card > *:nth-child(5) { animation-delay: 0.5s; }
 
 /* ========== FRIENDS LIST ========== */
 .friends-list {
@@ -1281,4 +1152,20 @@ body {
 #welcome-text {
   color: var(--primary);
   font-weight: 600;
+}
+
+/* ========== TOUCH DEVICE CURSOR RESET ========== */
+.touch {
+  cursor: default !important;
+}
+
+.touch a,
+.touch button,
+.touch .spotify,
+.touch .dc,
+.touch .btn-glow,
+.touch .track-btn,
+.touch .music-handle,
+.touch .popup-btn {
+  cursor: default !important;
 }
