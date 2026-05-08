@@ -199,6 +199,58 @@
       
       hasActivity = filteredActs.length > 0;
       
+      if (filteredActs.length > 0) {
+        var actsHtml = filteredActs.map(function(act) {
+          var appId = act.application_id || "";
+          var isRoblox = appId === "3634458924713168" || (act.name && act.name.toLowerCase().includes("roblox"));
+          
+          if (act.timestamps && act.timestamps.start) {
+            if (discordStart === null || currentGameStart !== act.timestamps.start) {
+              discordStart = act.timestamps.start;
+              currentGameStart = act.timestamps.start;
+            }
+          }
+          
+          var imgHtml = "";
+          if (isRoblox) {
+            imgHtml = "<img class=\"game-img\" src=\"https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png\" alt=\"Roblox\" onerror=\"this.style.display='none'\">";
+          } else if (act.assets) {
+            var largeUrl = utils.getImageUrl(act.assets, "large_image", appId);
+            var smallUrl = utils.getImageUrl(act.assets, "small_image", appId);
+            var imgUrl = largeUrl || smallUrl;
+            if (imgUrl) {
+              imgHtml = "<img class=\"game-img\" src=\"" + imgUrl + "\" alt=\"" + utils.escapeHtml(act.name) + "\" onerror=\"this.style.display='none'\">";
+            } else if (appId) {
+              imgHtml = "<img class=\"game-img\" src=\"https://cdn.discordapp.com/app-assets/" + appId + "/icon.png\" alt=\"Game\" onerror=\"this.style.display='none'\">";
+            }
+          }
+          
+          if (!imgHtml && act.name) {
+            imgHtml = "<div class=\"game-icon-placeholder\">" + act.name.charAt(0).toUpperCase() + "</div>";
+          }
+          
+          var gameTime = "";
+          if (act.timestamps && act.timestamps.start) {
+            gameTime = utils.formatDuration(Date.now() - act.timestamps.start);
+          }
+          
+          return "<div class=\"dc" + (isRoblox ? " roblox-card" : "") + "\">" + imgHtml + "<div class=\"dc-info\"><div class=\"game-name\">" + utils.escapeHtml(act.name) + "</div><div class=\"dc-time\">" + gameTime + "</div></div></div>";
+        }).join("");
+        
+        if (dom.activityStatus) {
+          dom.activityStatus.textContent = filteredActs.length > 1 ? filteredActs.length + " jogos" : filteredActs[0].name.slice(0, 12);
+        }
+        
+        if (dom.discordBox) {
+          dom.discordBox.innerHTML = actsHtml;
+        }
+      } else {
+        if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
+        discordStart = null;
+        currentGameStart = null;
+        if (dom.discordBox) dom.discordBox.innerHTML = "";
+      }
+      
       if (spotify && spotify.album_art_url) {
         currentSpotify = spotify;
         spotifyData = spotify;
@@ -235,41 +287,6 @@
         spotifyData = null;
         clearInterval(spotifyTimerInterval);
         if (dom.spotifyBox) dom.spotifyBox.innerHTML = "";
-      }
-      
-      if (filteredActs.length > 0) {
-        var act = filteredActs[0];
-        if (dom.activityStatus) dom.activityStatus.textContent = act.name.slice(0, 12);
-        var appId = act.application_id;
-        var isRoblox = appId === "3634458924713168" || (act.name && act.name.toLowerCase().includes("roblox"));
-        
-        if (act.timestamps && act.timestamps.start) {
-          if (discordStart === null || currentGameStart !== act.timestamps.start) {
-            discordStart = act.timestamps.start;
-            currentGameStart = act.timestamps.start;
-          }
-        }
-        
-        var imgHtml = "";
-        if (isRoblox) {
-          imgHtml = "<img class=\"game-img\" src=\"https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png\" alt=\"Roblox\" onerror=\"this.style.display='none'\">";
-        } else if (act.assets) {
-          var url = utils.getImageUrl(act.assets, "large_image", appId) || utils.getImageUrl(act.assets, "small_image", appId);
-          if (url) {
-            imgHtml = "<img class=\"game-img\" src=\"" + url + "\" alt=\"Game\" onerror=\"this.style.display='none'\">";
-          } else if (act.application_id) {
-            imgHtml = "<div class=\"game-icon-placeholder\">" + (act.name ? act.name.charAt(0).toUpperCase() : "?") + "</div>";
-          }
-        }
-        
-        if (dom.discordBox) {
-          dom.discordBox.innerHTML = "<div class=\"dc" + (isRoblox ? " roblox-card" : "") + "\">" + imgHtml + "<div class=\"dc-info\"><div class=\"game-name\">" + utils.escapeHtml(act.name) + "</div><div class=\"dc-time\">" + (discordStart ? utils.formatDuration(Date.now() - discordStart) : "00:00") + "</div></div></div>";
-        }
-      } else {
-        if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
-        discordStart = null;
-        currentGameStart = null;
-        if (dom.discordBox) dom.discordBox.innerHTML = "";
       }
       
     } catch (err) {
