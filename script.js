@@ -243,12 +243,16 @@
         
         if (dom.discordBox) {
           dom.discordBox.innerHTML = actsHtml;
+          dom.discordBox.style.display = "block";
         }
       } else {
         if (dom.activityStatus) dom.activityStatus.textContent = "Idle";
         discordStart = null;
         currentGameStart = null;
-        if (dom.discordBox) dom.discordBox.innerHTML = "";
+        if (dom.discordBox) {
+          dom.discordBox.innerHTML = "";
+          dom.discordBox.style.display = "block";
+        }
       }
       
       if (spotify && spotify.album_art_url) {
