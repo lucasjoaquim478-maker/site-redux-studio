@@ -35,11 +35,11 @@
   let spotifyTotalMs = 0;
   let perfFetch = 0;
   let pendingSpotifyUrl = "";
-  let timerInterval = null, fetchInterval = null;
+  let timerInterval = null, fetchInterval = null, visitorInterval = null;
   let hasEntered = false;
   let isPlaying = false;
   let currentUser = null;
-  const isDev = true;
+  const isDev = false;
   
   const utils = {
     formatDuration(ms) {
@@ -117,9 +117,6 @@
   
   function updateTimers() {
     if (dom.sessionTime) dom.sessionTime.textContent = utils.brt();
-    if (discordStart && hasActivity && dom.visitorCount) {
-      dom.visitorCount.textContent = utils.formatDuration(Date.now() - discordStart);
-    }
   }
   
   async function fetchVisitors() {
@@ -251,7 +248,7 @@
         currentGameStart = null;
         if (dom.discordBox) {
           dom.discordBox.innerHTML = "";
-          dom.discordBox.style.display = "block";
+          dom.discordBox.style.display = "none";
         }
       }
       
@@ -389,6 +386,11 @@
     sendLogToApi({ time, message: fullInfo, type: "login" });
   }
   
+  window.updateAuthUI = function(user) {
+    currentUser = user;
+    sendUserLog(user);
+  };
+
   function enterApp() {
     if (hasEntered) return;
     hasEntered = true;
@@ -490,10 +492,12 @@
     updateTimers();
     clearInterval(timerInterval);
     clearInterval(fetchInterval);
+    clearInterval(visitorInterval);
     timerInterval = setInterval(updateTimers, 1000);
     fetchStatus();
     if (isDev) {
       fetchVisitors();
+      visitorInterval = setInterval(fetchVisitors, 30000);
       document.querySelectorAll('.dev-only').forEach(el => el.style.display = '');
     }
     fetchInterval = setInterval(fetchStatus, FETCH_INTERVAL);
@@ -570,6 +574,7 @@
     clearInterval(timerInterval);
     clearInterval(fetchInterval);
     clearInterval(spotifyTimerInterval);
+    clearInterval(visitorInterval);
   });
   
 })();
